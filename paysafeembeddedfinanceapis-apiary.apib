@@ -1,80 +1,2090 @@
 FORMAT: 1A
-HOST: https://polls.apiblueprint.org/
+HOST: https://api2.paysafe.com/
 
-# Paysafe - Embedded Finance APIs
+# Paysafe - Embedded Finance APIs v2.2
+Paysafe's platform offering caters to merchants that need to implement embedded finance services into their products, 
+such as marketplaces, e-commerce, electronic goods and more. 
 
-Polls is a simple API allowing consumers to view polls and vote in them.
 
-## Questions Collection [/questions]
+## Authentication
+In order for you to use the Paysafe REST API, Paysafe must first set you up on their system and provide you with an API key. 
+Your API key looks something like this:
 
-### List All Questions [GET]
+* Key Username – MerchantXYZ </li>
+* Key Password – B-tst1-0-51ed39e4-312d02345d3f123120881dff9bb4020a89e8ac44cdfdcecd702151182fdc952272661d290ab2e5849e31bb03deede7e 
+
+Note that this is not the same as your Merchant Back Office username and password.
+
+The case-sensitive API key is sent using HTTP Basic Authentication. To use HTTP Basic Authentication, you must send the API key credentials 
+using the Authorization header with every request. The Authorization header is constructed as follows:
+
+1. The Key Username and Key Password are combined into a string separated by a colon, e.g.,“Key Username:Key Password”.
+2. The resulting string literal is then encoded using Base64.
+3. The authorization method and a space (i.e., “Basic”) are then put before the encoded string.
+
+For example, using the Key Username and Password examples above, the header is formed as follows:
+
+`Authorization: Basic TWVyY2hhbnRYWVo6Qi10c3QxLTAtNTFlZDM5ZTQtMzEyZDAyMzQ1ZDNmMTIzMTIwODgxZGZmOWJiNDAyMGE4OWU4YWM0NGNkZmRjZWNkNzAyMTUxMTgyZmRjOTU yMjcyNjYxZDI5MGFiMmU1ODQ5ZTMxYmIwM2RlZWRlN2U=`
+
+For additional details, please refer to http://en.wikipedia.org/wiki/Basic_access_authentication.
+
+Note: Your Production API key will be different from your Test API key. Contact your account manager for details. You must keep your API keys safe and ensure that it is used appropriately for your needs.
+
+
+## Get your Secret API Key
+<a name="apikeys" title="Get your API Keys"></a>
+The API uses a distinct API key:<br/>
+* The Secret Key – used for all server-to-server API requests.
+
+You can retrieve your Secret key for your account via the [Business Portal](https://merchant.paysafe.com/portal/login).
+
+<a name="secretapikey" title="Secret API Key"></a>
+
+
+#### Secret API Key
+You use the Secret API key in all your server-to-server API requests.
+
+ > **Note:** You must Base64 Encode your Secret API key before using it in your API requests.
+
+To retrieve your Secret API key from the Business Portal:
+ 1. Go to **Integrate>API Keys**.
+ 2. Under **Secret Key**, click **Authenticate Now**.
+ ![](https://github.com/paysafegroup/paysafe_api_paymenthub_v1/raw/master/images/Secret_Key1.png)
+ 3. Enter your Business Portal password and click **Authenticate**.
+ 4. You can now access your Secret API key.
+ ![](https://github.com/paysafegroup/paysafe_api_paymenthub_v1/raw/master/images/Secret_Key2.png)
+
+ > **Note:** All your APIs will use the same API key.
+
+Your API key will have the following format:
+* Key Username – MerchantXYZKey
+* Password – B-tst1-0-51ed39e4-312d02345d3f123120881dff9bb4020a89e8ac44cdfdcecd702151182fdc952272661d290ab2e5849e31bb03deede7e
+
+The API key is case-sensitive and sent using HTTP Basic Authentication.
+To use HTTP Basic Authentication, you must send the API key credentials using the Authorization header with every request.
+
+You must construct the Authorization header as follows:
+1. Combine the Key Username and Key Password into a string separated by a colon, for example, “Key Username:Key Password”.
+2. The resulting string literal is then encoded using Base64.
+3. The authorization method and space (That is, “Basic”) are then put before the encoded string.
+
+For example, using the above Key Username and Password, the header is formed as follows:
+
+```Authorization: Basic TWVyY2hhbnRYWVo6Qi10c3QxLTAtNTFlZDM5ZTQtMzEyZDAyMzQ1ZDNmMTIzMTIwODgxZGZmOWJiNDAyMGE4OWU4YWM0NGNkZmRjZWNkNzAyMTUxMTgyZmRjOTU yMjcyNjYxZDI5MGFiMmU1ODQ5ZTMxYmIwM2RlZWRlN2U=```
+For additional details, please refer [Authentication](https://developer.paysafe.com/en/rest-apis/reference-information/important-integration-concepts/authentication/).
+
+
+## API Overview
+Built on top of Paysafe's solid API infrastructure, it requires minimal enhancement in terms of integration, authentication and monitoring.  
+
+The service can easily and securely process payments & wallet requests from your customers using a single API. 
+
+Paysafe's all-in-one Business Portal 
+allows the merchant to access transaction analytics and manage the merchant account.
+
+### API Endpoints 
+**URL** `https://api2.paysafe.com/digitalwallet/v1`
+|Endpoint URL|Description|Action|
+|:--- |:--- | :---|
+|/wallets|Onboard a customer|POST|
+|/customers|Lookup a customer's details|GET|
+|/accounts|Lookup a customer's account details|GET|
+|/rapidTransferBanks|Lookup banks supported for a countryamount|GET|
+|/transactions|Lookup a transaction details|GET|
+
+
+**URL** `https://api2.paysafe.com/paymenthub/v1`
+|Endpoint URL|Description|Action|
+|:--- |:--- | :---|
+|/paymenthandles|Initiate a payment request|POST|
+|/payments|Finalize a payment request|POST|
+|/standaloneCredits|Standalone Credits allow merchants to issue payouts to customers|POST| 
+
+### Pagination
+
+In the case where an API GET request returns multiple results, Paysafe returns the first 10 records by default and uses HATEOAS links to provide page navigation. In addition to the default behavior, it is also possible to control the number of results and starting point by passing in query parameters  as described in this [section](https://developer.paysafe.com/en/resources-and-support/pagination/).
+
+<a name="globalinvalidcharacters" title="Global Invalid Characters"></a>
+### Global Invalid Characters
+
+You must not include any of the characters in this [table](https://developer.paysafe.com/en/resources-and-support/global-invalid-characters/) as values in any of your request parameters. Object. If you do, your request will result in an error.
+
+<a name="isostandards" title="ISO Standards"></a>
+### ISO Standards
+
+ISO standards add value by providing the common business process data semantics to be used in the API based exchanges. This [section](https://developer.paysafe.com/en/resources-and-support/iso-standards/) presents you codes for four areas - Currency, Province, State, and Country.
+
+
+Please refer [Miscellaneous](https://developer.paysafe.com/en/rest-apis/paysafe-payments-api/payments-api/miscellaneous/) for Global Invalid Characters, ISO Standards, Currency Codes, Province Codes, State Codes, Country Codes.
+
+## Error Summary
+
+### Common Errors
+| HTTP Status Code | Error Code | Description                                                                                                                                                                 |
+|------------------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 500              | 1000       | An internal error occurred.                                                                                                                                                 |
+| 502              | 1001       | An error occurred with the external processing gateway.                                                                                                                     |
+| 500              | 1002       | An internal error occurred.                                                                                                                                                 |
+| 500              | 1003       | An internal error occurred.                                                                                                                                                 |
+| 500              | 1007       | An internal error occurred.                                                                                                                                                 |
+| 500              | 1008       | An internal error occurred.                                                                                                                                                 |
+| 429              | 1200       | The API call has been denied as it has exceeded the permissible call rate limit.                                                                                            |
+| 401              | 5000       | Your merchant account authentication failed. Either your store ID/password is invalid or the IP address from which you are sending the transaction has not been authorized. |
+| 400              | 5001       | The submitted currency code is invalid or your account does not support this currency.                                                                                      |
+| 400              | 5003       | You submitted an invalid amount with your request.                                                                                                                          |
+| 400              | 5004       | You submitted an invalid account type with your request.                                                                                                                    |
+| 400              | 5005       | You submitted an invalid operation type with your request.                                                                                                                  |
+| 400              | 5010       | The submitted country code is invalid.                                                                                                                                      |
+| 400              | 5016       | The merchant account you provided cannot be found.                                                                                                                          |
+| 400              | 5017       | The merchant account you provided is disabled.                                                                                                                              |
+| 402              | 5021       | Your transaction request has been declined.                                                                                                                                 |
+| 400              | 5023       | The request is not parseable.                                                                                                                                               |
+| 409              | 5031       | The transaction you have submitted has already been processed.                                                                                                              |
+| 401              | 5040       | Your merchant account is not configured for the transaction you attempted.                                                                                                  |
+| 400              | 5042       | The merchant reference number is missing or invalid or it exceeds the maximum permissible length.                                                                           |
+| 400              | 5068       | Either you submitted a request that is missing a mandatory field or the value of a field does not match the format expected.                                                |
+| 404              | 5269       | The ID(s) specified in the URL do not correspond to the values in the system.                                                                                               |
+| 403              | 5270       | The credentials provided with the request do not have permission to access the requested data.                                                                              |
+| 406              | 5271       | You requested a response in the 'Accept' header that is in an unsupported format.                                                                                           |
+| 406              | 5272       | The 'Content-Type' you specified in request header was submitted in an unsupported format.                                                                                  |
+| 404              | 5273       | Your client reached our application but we were unable to service your request due to an invalid URL.                                                                       |
+| 401              | 5275       | The authentication credentials provided with the request have expired.                                                                                                      |
+| 401              | 5276       | The authentication credentials provided with the request provided have been disabled.                                                                                       |
+| 401              | 5277       | The authentication credentials provided with the request have been locked due to multiple authentication failures.                                                          |
+| 401              | 5278       | The authentication credentials provided with the request were not accepted for an unknown reason.                                                                           |
+| 401              | 5279       | The authentication credentials are invalid.                                                                                                                                 |
+| 401              | 5280       | The required authentication credentials were not provided.                                                                                                                  |
+| 405              | 5281       | The request uses an action (for example, GET, POST, or PUT) that is not supported by the resource.                                                                          |
+| 400              | 5283       | The requested operation can only be executed on a Payment Handle with the status of *PAYABLE*.                                                                              |
+| 400              | 5501       | The profile does not have an active credit card.                                                                                                                            |
+| 400              | 5502       | Either the payment token is invalid or the corresponding profile or bank account is not active.                                                                             |
+
+### Payment Errors
+| HTTP Status Code | Error Code   | Description                                                                                                                                                                                                                          |
+|------------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 400              | PAYMENTHUB-1 | The submitted payment type and currency code combination is not supported.                                                                                                                                                           |
+| 400              | 3002         | You submitted an invalid card number or brand or combination of card number and brand with your request.                                                                                                                             |
+| 400              | 3004         | The zip/postal code must be provided for an AVS check request.                                                                                                                                                                       |
+| 400              | 3005         | You submitted an incorrect CVV value with your request.                                                                                                                                                                              |
+| 400              | 3006         | You submitted an expired credit card number with your request.                                                                                                                                                                       |
+| 402              | 3007         | Your request has failed the AVS check. Note that the amount has still been reserved on the customer's card and will be released in 3–5 business days. Please ensure the billing address is accurate before retrying the transaction. |
+| 400              | 3008         | You submitted a card type for which the merchant account is not configured.                                                                                                                                                          |
+| 402              | 3009         | Your request has been declined by the issuing bank.                                                                                                                                                                                  |
+| 402              | 3011         | Your request has been declined by the issuing bank because the card used is a restricted card. Contact the cardholder's credit card company for further investigation.                                                               |
+| 402              | 3012         | Your request has been declined by the issuing bank because the credit card expiry date submitted is invalid.                                                                                                                         |
+| 402              | 3013         | Your request has been declined by the issuing bank due to problems with the credit card account.                                                                                                                                     |
+| 402              | 3014         | Your request has been declined - the issuing bank has returned an unknown response. Contact the card holder's credit card company for further investigation.                                                                         |
+| 402              | 3015         | The bank has requested that you process the transaction manually by calling the cardholder's credit card company.                                                                                                                    |
+| 402              | 3016         | The bank has requested that you retrieve the card from the cardholder – it may be a lost or stolen card.                                                                                                                             |
+| 402              | 3017         | You submitted an invalid credit card number with your request.                                                                                                                                                                       |
+| 402              | 3018         | The bank has requested that you retry the transaction.                                                                                                                                                                               |
+| 402              | 3019         | Your request has failed the CVV check. Please note that the amount may still have been reserved on the customer's card, in which case it will be released in 3–5 business days.                                                      |
+| 402              | 3020         | The bank has requested that you retry the transaction.                                                                                                                                                                               |
+| 404              | 3021         | The confirmation number included in this request could not be found.                                                                                                                                                                 |
+| 402              | 3022         | The card has been declined due to insufficient funds.                                                                                                                                                                                |
+| 402              | 3023         | Your request has been declined by the issuing bank due to its proprietary card activity regulations.                                                                                                                                 |
+| 402              | 3024         | Your request has been declined because the issuing bank does not permit the transaction for this card.                                                                                                                               |
+| 400              | 3025         | The external processing gateway has reported invalid data.                                                                                                                                                                           |
+| 400              | 3026         | The external processing gateway has reported the account type is invalid.                                                                                                                                                            |
+| 402              | 3027         | The external processing gateway has reported a limit has been exceeded.                                                                                                                                                              |
+| 502              | 3028         | The external processing gateway has reported a system error.                                                                                                                                                                         |
+| 402              | 3029         | The external processing gateway has rejected the transaction.                                                                                                                                                                        |
+| 402              | 3030         | The external processing gateway has reported the transaction is unauthorized.                                                                                                                                                        |
+| 400              | 3031         | The confirmation number you submitted with your request references a transaction that is not on hold.                                                                                                                                |
+| 402              | 3032         | Your request has been declined by the issuing bank or external gateway because the card is probably in one of their negative databases.                                                                                              |
+| 402              | 3035         | Your request has been declined due to exceeded PIN attempts.                                                                                                                                                                         |
+| 402              | 3036         | Your request has been declined due to an invalid issuer.                                                                                                                                                                             |
+| 402              | 3037         | Your request has been declined because it is invalid.                                                                                                                                                                                |
+| 402              | 3038         | Your request has been declined due to customer cancellation.                                                                                                                                                                         |
+| 402              | 3039         | Your request has been declined due to an invalid authentication value.                                                                                                                                                               |
+| 402              | 3040         | Your request has been declined because the request type is not permitted on the card.                                                                                                                                                |
+| 402              | 3041         | Your request has been declined due to a timeout.                                                                                                                                                                                     |
+| 402              | 3042         | Your request has been declined due to a cryptographic error.                                                                                                                                                                         |
+| 402              | 3044         | You have submitted a duplicate request.                                                                                                                                                                                              |
+| 402              | 3045         | You submitted an invalid date format for this request.                                                                                                                                                                               |
+| 402              | 3046         | The transaction was declined because the amount was set to zero.                                                                                                                                                                     |
+| 402              | 3047         | The transaction was declined because the amount exceeds the floor limit.                                                                                                                                                             |
+| 402              | 3048         | The transaction was declined because the amount is less than the floor limit.                                                                                                                                                        |
+| 402              | 3049         | The bank has requested that you retrieve the card from the cardholder – the credit card has expired.                                                                                                                                 |
+| 402              | 3050         | The bank has requested that you retrieve the card from the cardholder – fraudulent activity is suspected.                                                                                                                            |
+| 402              | 3051         | The bank has requested that you retrieve the card from the cardholder – contact the acquirer for more information.                                                                                                                   |
+| 402              | 3052         | The bank has requested that you retrieve the card from the cardholder – the credit card is restricted.                                                                                                                               |
+| 402              | 3053         | The bank has requested that you retrieve the card from the cardholder – please call the acquirer.                                                                                                                                    |
+| 402              | 3054         | The transaction was declined due to suspected fraud.                                                                                                                                                                                 |
+| 402              | 3055         | This type of transaction is not supported.                                                                                                                                                                                           |
+| 402              | 3056         | The original transaction type does not match.                                                                                                                                                                                        |
+| 402              | 3057         | Please tell cardholder to call the issuer – do not retry transaction.                                                                                                                                                                |
+| 409              | 5284         | An entity with the specified identifier(s) already exists.                                                                                                                                                                           |
+| 400              | 5286         | Card with the specified identifier(s) does not exist.                                                                                                                                                                                |
+| 404              | 5288         | Card does not belong to consumer.                                                                                                                                                                                                    |
+| 400              | 5303         | Payment instrument already exists.                                                                                                                                                                                                   |
+| 400              | 5304         | Expired card.                                                                                                                                                                                                                        |
+| 403              | 5309         | The maximum amount of money allowed for the requested operation is exceeded.                                                                                                                                                         |
+
+
+### Alternate Payments Errors
+| HTTP Status | Error Code                    | Message                                                                                  | Details                                                                                            |
+|-------------|-------------------------------|------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-1  | Transaction cancelled at the gateway                                                     | The transaction was cancelled at the gateway.                                                      |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-4  | Transaction declined by the gateway                                                      | The transaction declined by the gateway.                                                           |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-5  | Incomplete transaction                                                                   | The requested operation can only be executed on a completed transaction.                           |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-6  | Over refund                                                                              | The total refund amount cannot exceed the original payment amount.                                 |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-7  | Payment expired                                                                          | The payment has expired.                                                                           |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-8  | Over settlement                                                                          | The total Settlement amount cannot exceed the authorized (payment) amount.                         |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-9  | Risk gateway error                                                                       | A risk issue was reported by the gateway.                                                          |
+| 502         | ALTERNATE-PAYMENTS-GATEWAY-10 | Payment type temporarily unavailable                                                     | The gateway is temporarily unavailable due to system maintenance activities.                       |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-11 | Over voidauth                                                                            | The void authorization cannot exceed the amount remaining to settle for the corresponding payment. |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-12 | Payment already settled                                                                  | The payment is already partially/fully settled.                                                    |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-13 | Transaction not refundable yet                                                           | The transaction is not refundable yet.                                                             |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-14 | Partial settlements not possible                                                         | Partial Settlements are not possible with the selected payment method.                             |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-16 | The requested amount exceeds the allowed maximum for the specified payment type.         | The requested amount exceeds the allowed maximum for the specified payment type.                   |
+| 504         | ALTERNATE-PAYMENTS-GATEWAY-17 | Your request timed out before it could be completed.                                     | Your request timed out before it could be completed.                                               |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-19 | The payment instrument does not have sufficient funds.                                   | The payment instrument does not have sufficient funds.                                             |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-20 | The third-party account has not been activated.                                          | The third-party account has not been activated.                                                    |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-21 | The requested amount is under the allowed minimum amount for the specified payment type. | The requested amount is under the allowed minimum amount for the specified payment type.           |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-22 | The provided identity details do not match the identity details already present.         | The provided identity details do not match the identity details already present.                   |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-23 | The KYC documents provided could not be verified.                                        | The KYC documents provided could not be verified.                                                  |
+| 402         | ALTERNATE-PAYMENTS-GATEWAY-24 | There is an already existing third-party account with the details provided.              | There is an already existing third-party account with the details provided.                        |
+
+
+### Wallet Errors
+
+| HTTP Status Code | Error Code                                  | Message                                                          |
+|------------------|---------------------------------------------|------------------------------------------------------------------|
+| 400              | DW-CUSTOMER-ACCOUNT-ID-SHOULD-BE-NUMERIC    | AccountId should be numeric value                                |
+| 400              | DW-CUSTOMER-BAD-REQUEST                     | Bad request for customer operation.                              |
+| 400              | DW-CUSTOMER-BIRTH-DATE-CHANGE-NOT-SUPPORTED | Birth date change is not supported                               |
+| 400              | DW-CUSTOMER-COUNTRY-NOT-SUPPORTED           | Country is not supported                                         |
+| 400              | DW-CUSTOMER-CURRENCY-NOT-SUPPORTED          | Currency is not supported for the specified country              |
+| 400              | DW-CUSTOMER-EMAIL-CHANGE-NOT-SUPPORTED      | Email change is not supported                                    |
+| 400              | DW-CUSTOMER-ID-SHOULD-BE-NUMERIC            | CustomerId should be numeric value                               |
+| 400              | DW-TERMS-AND-CONDITIONS-NOT-ACCEPTED        | Terms and conditions are not accepted.                           |
+| 409              | DW-CUSTOMER-ALREADY-ACTIVATED               | Customer is already activated.                                   |
+| 409              | DW-CUSTOMER-ALREADY-DEACTIVATED             | Customer is already deactivated.                                 |
+| 409              | DW-CUSTOMER-ALREADY-ONBOARDED               | Customer with the same details has already been onboarded.       |
+| 409              | DW-CUSTOMER-CONFLICT                        | There was a conflict (validation error). Check body for details. |
+| 500              | DW-CUSTOMER-INTERNAL-SERVER-ERROR           | There was an error while processing the customer operation.      |
+| 503              | DW-SERVICE-UNAVAILABLE                      | Service Unavailable                                              |
+
+ 
+## Testing
+Test accounts enable you to process API transactions that mirror the functionality of the Production environment.
+
+Transactions processed in the Test environment are executed on a simulator. Depending on the information provided with the transaction request, the simulator returns either a successful (approved) or failed (declined) response.
+
+With the API, you can:
+* Verify support for all the operation types that you require.
+* Review all common errors as well as unique errors that may occur for each operation.
+* Verify the length and format for all attributes you send.
+
+For access to Test accounts and credentials, contact your account manager or reach out to <integrations@paysafe.com>.
+Your Test account has access to the Test version of the Paysafe [Business Portal](https://merchant.test.paysafe.com/portal#/login), where you can view the status of your Test transactions.
+
+
+###  Test URL
+To test your integration with Paysafe, use the following Test URL:
+
+`https://api2.test.paysafe.com/digitalwallets/v1/` 
+
+For example:
+
+`https://api2.test.paysafe.com/digitalwallet/v1/customers/{customer_id}`
+
+
+# Group Digital Wallet
+Paysafe's provides ledger, multiple currencies, multiple region coverage, risk 
+and AML monitoring and a multitude of payment options providing an out-of-the-box, compliant e-money platform.
+
+
+## Wallets [/digitalwallets/v1/wallets]
+Create a customer and their account(s) through a single request
+
++ Attributes (Wallet)
+
+
+### Onboard a Customer [POST]
+Business requirements for creating a new wallet:
+
+* KYC verifications passed - a flag must be passed when creating a customer wallet that denotes that, and is the proof that Paysafe accepts that the customer was indeed verified. If the value of this flag is different than ``, the wallet creation will fail
+* Paysafe requires certain mandatory data points about the customer and identity metadata to be provided for a customer wallet account to be created. The details are documented in the API documentation.
+* The currency of a wallet can only be created in EUR for the EEA and in GBP for the UK.
+
+Call **Onboard a customer**, with the following requirements for the data being passed in the body of the request:
+
+* `customer` - all required fields must be fully populated - Paysafe needs this information for regulatory purposes.
+
+* `accounts` - at least one account object has to be populated; please refer to Merchant's agreement with Paysafe for a list of supported wallet currencies. If an unsupported currency is passed, or if two Account objects with the same currency are provided, creating the wallet will fail.
+    * when creating a new wallet, `totalBalance` and `availableBalance` must be equal
+    * when `hasIban == true`, a new Virtual IBAN (vIBAN) will be allocated for this customer for that account and currency. The vIBAN will be provided to the Merchant in the API response.
+
+> NOTE: Assigning virtual IBAN will be different due to differences in the region and bank used. Paysafe will try to return the information as soon as possible.
+><br>
+> When creating a new customer, the response man include a virtual IBAN assigned to the account. This means that Paysafe managed to assign the virtual IBAN to the customer, and no subsequent webhooks will be sent.
+><br>
+> If the response DOES NOT contain a value for the account's `iban`, this means that the virtual IBAN will be assigned asynchronously. In this case the Merchant must wait for a webhook that will notify the availability of the virtual IBAN for this customer. When the webhook received, the Merchant must fetch the IBAN via the get Accounts API (due to information security requirements, Paysafe should not send the IBAN via a webhook).
+
+&nbsp;
+
+When creating a wallet for an **newly signed-up customer**, the `totalBalance` and `availableBalance` fields for all `account` objects must be set to 0.
+
+To migrate the balance, Merchant calls an API endpoint to debit the amounts specified from the Merchant wallet, and credit these amounts into the customer's wallet effectively creating a starting balance.
+
+In case the email provided is not unique and a wallet is already created
+using this email address, the creation of a new wallet will fail.
+
+After creating the wallet, the customer could be restricted on Paysafe side
+based on regulatory and risk checks.
+
+&nbsp;
+&nbsp;
+&nbsp;
+
+  
++ Request Onboard a Customer (application/json)
+
+   + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"`
+
+    + Body
+    
+            {
+              "customer": {
+                "firstName": "John",
+                "lastName": "Doe",
+                "email": "john.doe@example.com",
+                "address1": "23 Four Street",
+                "zip": "LE14",
+                "countryCode": "BG",
+                "birthDate": "1999-08-24",
+                "registrationIp": "192.0.250",
+                "nationality": "EU",
+                "externalId": "d6f475fe-57c9-4865-9316-0c3b8e8128d4",
+                "kyc": {
+                  "status": "COMPLETED"
+                },
+                "type": "PERSON"
+              },
+              "accounts": [
+                {
+                  "externalId": "merchant-id",
+                  "currencyCode": "EUR",
+                  "hasIban": true
+                }
+              ],
+              "risk": {
+                "customerRiskRating": 50
+              },
+              "customerIp": "192.0.250"
+            }
 
 + Response 200 (application/json)
-
-        [
-            {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
+    + Body
+    
+                {
+                  "customer": {
+                    "id": "5435323362",
+                    "firstName": "John",
+                    "lastName": "Doe",
+                    "email": "john.doe@example.com",
+                    "address1": "23 Four Street",
+                    "zip": "LE14",
+                    "countryCode": "BG",
+                    "birthDate": "1999-08-24",
+                    "registrationIp": "192.0.250",
+                    "nationality": "EU",
+                    "externalId": "d6f475fe-57c9-4865-9316-0c3b8e8128d4",
+                    "kyc": {
+                      "status": "COMPLETED",
+                    },
+                    "type": "PERSON",
+                  },
+                  "accounts": [
                     {
-                        "choice": "Swift",
-                        "votes": 2048
-                    }, {
-                        "choice": "Python",
-                        "votes": 1024
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 512
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 256
+                      "id": "42342355",
+                      "externalId": "merchant-id",
+                      "currencyCode": "EUR",
+                      "hasIban": true,
+                      "iban": "NL74ABNA1231242344",
+                      "totalBalance": 0,
+                      "availableBalance": 0,
+                      "creationTime": "2019-08-24T14:15:22Z"
                     }
-                ]
+                  ],
+                  "risk": {
+                    "customerRiskRating": 50,
+                    "isScaPerformed": false,
+                    "isCustomerIPTrusted": false,
+                    "isBeneficiaryTrusted": false
+                  },
+                  "customerIp": "192.0.250"
+                }
+
+## Customers [/digitalwallets/v1/customers/{customerId}]
+Manage and get details about a customer
+
++ Attributes (Customer)
+
+
+### Lookup a Customer [GET]
+
++ Request Look up a customer's details
+    + Headers
+    
+                Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+
++ Parameters
+    + customerId: 5435323362 (string, required)
+    
++ Response 200 (application/json)
+    + Body
+    
+                    {
+                      "id": "5435323362",
+                      "firstName": "John",
+                      "lastName": "Doe",
+                      "email": "john.doe@example.com",
+                      "address1": "23 Four Street",
+                      "zip": "LE14",
+                      "countryCode": "GB",
+                      "birthDate": "1999-08-24",
+                      "registrationIp": "192.0.250",
+                      "nationality": "GB",
+                      "externalId": "d6f475fe-57c9-4865-9316-0c3b8e8128d4",
+                      "kyc": {
+                        "status": "COMPLETED",
+                      },
+                      "type": "PERSON"
+                    }
+
+## Accounts [/digitalwallets/v1/accounts/{accountId}]
+Manage and get details about a customer account
+
++ Attributes (Account)
+
+
+### Lookup a Customer Account[GET]
+
++ Request Look up a customer's account details
+    + Headers
+    
+                Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+
++ Parameters
+    + accountId: 5435323362 (string, required)
+    
++ Response 200 (application/json)
+    + Body
+    
+            {
+                "id": "509876034",
+                "customerId": "5435323362",
+                "externalId": "22e8b836-2302-49f5-b13d-537ccdbbb41d",
+                "currencyCode": "GBP",
+                "totalBalance": 55000,
+                "availableBalance": 50000,
+                "iban": "NL74ABNA1231242344",
+                "bic": "ABNANL2A",
+                "creationTime": "2019-08-24T14:15:22Z",
+                "hasIban": true
             }
-        ]
 
-### Create a New Question [POST]
 
-You may create your own question using this action. It takes a JSON
-object containing a question and a collection of answers in the
-form of choices.
 
-+ Request (application/json)
 
-        {
-            "question": "Favourite programming language?",
-            "choices": [
-                "Swift",
-                "Python",
-                "Objective-C",
-                "Ruby"
-            ]
-        }
+## Rapid Transfer Banks [/digitalwallets/v1/rapidtransferbanks/?{country}&{amount}]
+### Get available banks for Rapid Transfer [GET]
 
-+ Response 201 (application/json)
+Returns a list of supported banks for instant bank transfers for the country specified, along with additional information 
+
++ Request Get available banks for Rapid Transfer
+    + Headers
+    
+                Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+                
++ Parameters
+    + country: DE (string, required)
+      ISO Alpha2 country code
+    + amount: 25000 (number, optional)
+      Transaction amounts 
+
++ Response 200 (application/json)
+    + Body
+    
+                 {
+                  "rapidTransferBanks": [
+                    {
+                      "id": "1000203",
+                      "bic": "NWBKGB2L",
+                      "name": "Natwest uk",
+                      "isAccountRequiredBeforeInitialization": true,
+                      "limit": "15000000",
+                      "country": "GB"
+                    }
+                  ]
+                }
+
+
+# Group Payment Hub
+Connect your application directly with our payment engine to process a full suite of methods that are REST-based – designed to be easy to 
+understand and use. 
+
+- Choose an efficient, lightweight, and fast integration method to access our API.
+- Implement a wide variety of REST-based API requests – including Payment Handles, Purchases and Standalone Credits.
+
+## Payment Handles [/paymenthub/v1/paymenthandles]
+A Payment Handle represents tokenized information about the payment method that you set up for your customer. Once the Payment Handle is created, you can then include the *paymentHandleToken* returned in the Payment Handle request response in a new [payment request](#paymentrequest).
+<br>
+> **Note:** A Payment Handle can be used in a [Payment request](#paymentrequest) only if it has the status of **PAYABLE**.
+
++ Attributes (PaymentHandle)
+
+
+### Create a Payment Handle [POST]
+* A Payment Handle for a standard credit card authorization
+* A Payment Handle for a credit card that is registered for 3D Secure - the response for this request will contain a redirect to present to the customer so they can validate their 3D Secure credentials
+* A Payment Handle for a credit card Standalone Credit
+
+ > **Note:** The *status* of Payment Handles will remain INITIATED  for the following cases:
+* When the customer is redirected to a *redirect_payment* URL until the customer verifies the payment instrument.
+* When the requested amount is more than the maximum amount configured in the Business Portal.
+* When Alternate Payment Methods like RapidTransfer, Paysafecash, Paysafecards are selected by the customer.
+
+
++ Request Create Payment Handle for Rapid Transfer for Payment (application/json)
 
     + Headers
 
-            Location: /questions/2
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
 
     + Body
 
             {
-                "question": "Favourite programming language?",
-                "published_at": "2015-08-05T08:40:51.620Z",
-                "choices": [
+                "merchantRefNum": "merchantRefNum-124",
+                "transactionType": "PAYMENT",
+                "rapidTransfer" : {
+                   "sepa": {
+                       "accountHolderName": "John Doe",
+                       "rapidTransferBankId": "1000203"
+                    }
+                },
+                "paymentType": "RAPID_TRANSFER",
+                "amount": 3000,
+                "currencyCode": "GBP",
+                "customerIp": "73.82.192.17",
+                "billingDetails": {
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "zip": "M5H 2N2",
+                    "country": "CA"
+                },
+                "wallet":{
+                   "customerId" : "GGG",
+                },
+                "returnLinks": [{
+                        "rel": "on_completed",
+                        "href": "https://US_commerce_site/payment/return/success",
+                        "method": "GET"
+                    },
                     {
-                        "choice": "Swift",
-                        "votes": 0
-                    }, {
-                        "choice": "Python",
-                        "votes": 0
-                    }, {
-                        "choice": "Objective-C",
-                        "votes": 0
-                    }, {
-                        "choice": "Ruby",
-                        "votes": 0
+                        "rel": "on_failed",
+                        "href": "https://US_commerce_site/payment/return/failed",
+                        "method": "GET"
                     }
                 ]
             }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": "372b5ee7-6360-4403-b444-164f8f1d2709",
+                "amount": 3000,
+                "merchantRefNum": "merchantRefNum-124",
+                "action": "REDIRECT",
+                "currencyCode": "GBP",
+                "usage": "SINGLE_USE",
+                "status": "INITIATED",
+                "paymentType": "RAPID_TRANSFER",
+                "executionMode": "SYNCHRONOUS",
+                "customerIp": "73.82.192.17",
+                "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                "billingDetails": {
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "country": "CA",
+                    "zip": "M5H 2N2"
+                },
+                "rapidTransfer" : {
+                   "sepa": {
+                       "accountHolderName": "John Doe",
+                       "rapidTransferBankId": "1000203",
+                       "bic": "ABNANL2APIP",
+                       "lastDigits": "00"
+                    }
+                },
+                "wallet":{
+                   "customerId" : "GGG",
+                   "slipId" : "100753"
+                },
+                "returnLinks": [{
+                        "rel": "on_completed",
+                        "href": "https://US_commerce_site/payment/return/success",
+                        "method": "GET"
+                    },
+                    {
+                        "rel": "on_failed",
+                        "href": "https://US_commerce_site/payment/return/failed",
+                        "method": "GET"
+                    }
+                ],
+                "links": [{
+                    "rel": "redirect_payment",
+                    "href": "http://api.paysafe.com/rapidtransfer/redirect/372b5ee7-6360-4403-b444-164f8f1d2709",
+                    "method": "GET"
+                }],
+                "timeToLiveSeconds": 899,
+                "transactionType": "PAYMENT"
+            }
+            
+
++ Request Create Payment Handle for Bank Wire Transfer for Standalone Credit (application/json)
+
+    + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+            Simulator: "EXTERNAL"
+
+    + Body
+
+            {
+                "merchantRefNum": "merchantRefNum-124",
+                "transactionType": "STANDALONE_CREDIT",
+                "sepa": {
+                    "nickName": "Sally's Barclays Account",
+                    "accountHolderName": "John Doe",
+                    "bic": "ABNANL2APIP",
+                    "iban": "DE89370400440532013000"
+                },
+                "paymentType": "BANK_TRANSFER",
+                "amount": 3000,
+                "currencyCode": "EUR",
+                "customerIp": "73.82.192.17",
+                "billingDetails": {
+                    "nickName": "Home",
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "zip": "M5H 2N2",
+                    "country": "CA"
+                },
+                "wallet":{
+                   "customerId" : "GGG",
+                   "verifiedInstrument" : false,
+                   "customerAccount" : {
+                       "id":"abc"
+                    }                   
+                }
+            }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": "372b5ee7-6360-4403-b444-164f8f1d2709",
+                "amount": 3000,
+                "merchantRefNum": "merchantRefNum-124",
+                "action": "NONE",
+                "currencyCode": "EUR",
+                "usage": "SINGLE_USE",
+                "status": "PAYABLE",
+                "paymentType": "BANK_TRANSFER",
+                "executionMode": "SYNCHRONOUS",
+                "customerIp": "73.82.192.17",
+                "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                "billingDetails": {
+                    "nickName": "Home",
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "country": "CA",
+                    "zip": "M5H 2N2"
+                },
+                "sepa": {
+                    "nickName": "Sally's Barclays Account",
+                    "accountHolderName": "John Doe",
+                    "bic": "ABNANL2APIP",
+                    "lastDigits": "00"
+                },
+                "wallet":{
+                   "customerId" : "GGG",
+                   "slipId" : "100753",
+                   "verifiedInstrument" : false,
+                   "customerAccount" : {
+                       "id":"abc"
+                   }
+                },
+                "timeToLiveSeconds": 899,
+                "transactionType": "STANDALONE_CREDIT"
+            }
+
++ Request Create Payment Handle for Faster Payments for Standalone Credit (application/json)
+
+    + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+            Simulator: "EXTERNAL"
+
+    + Body
+
+            {
+                "merchantRefNum": "merchantRefNum-124",
+                "transactionType": "STANDALONE_CREDIT",
+                "fasterPayments": {
+                    "accountHolderName": "John Doe",
+                    "sortCode": "321654",
+                    "accountNumber": "98877219"
+                    },
+                "paymentType": "BANK_TRANSFER",
+                "amount": 3000,
+                "currencyCode": "GBP",
+                "customerIp": "73.82.192.17",
+                "billingDetails": {
+                    "nickName": "Home",
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "zip": "M5H 2N2",
+                    "country": "CA"
+                },
+                "wallet":{
+                   "customerId" : "GGG",
+                   "verifiedInstrument" : true,
+                   "customerAccount" : {
+                       "id":"abc"
+                    }                   
+                }
+            }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "id": "372b5ee7-6360-4403-b444-164f8f1d2709",
+                "amount": 3000,
+                "merchantRefNum": "merchantRefNum-124",
+                "action": "NONE",
+                "currencyCode": "GBP",
+                "usage": "SINGLE_USE",
+                "status": "PAYABLE",
+                "paymentType": "BANK_TRANSFER",
+                "executionMode": "SYNCHRONOUS",
+                "customerIp": "73.82.192.17",
+                "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                "billingDetails": {
+                    "nickName": "Home",
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "country": "CA",
+                    "zip": "M5H 2N2"
+                },
+                "fasterPayments": {
+                    "accountHolderName": "John Doe",
+                    "sortCode": "321654",
+                    "lastDigits": "19"
+                    },
+                "wallet":{
+                   "customerId" : "GGG",
+                   "slipId" : "100753",
+                   "verifiedInstrument" : true,
+                   "customerAccount" : {
+                       "id":"abc"
+                    }                   
+                },
+                "timeToLiveSeconds": 899,
+                "transactionType": "STANDALONE_CREDIT"
+            }
+
+
+
+## Payments [/paymenthub/v1/payments]
+Process a payment using the paymentHandleToken. 
+
++ Attributes (Payment)
+
+
+### Process a payment [POST]
++ Request Process a Rapid Transfer (application/json)
+    + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+            
+    + Body
+    
+                {
+                  "merchantRefNum": "merchantRefNum-123",
+                  "amount": 1000,
+                  "currencyCode": "GBP",
+                  "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                  "description": "Consumer Purchase",
+                  "customerIp": "73.82.192.17"
+                }
+                
++ Response 201 (application/json)
+    + Body
+    
+                {
+                  "id": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+                  "merchantRefNum": "merchantRefNum-123",
+                  "amount": 1000,
+                  "currencyCode": "GBP",
+                  "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                  "paymentType": "RAPID_TRANSFER",
+                  "rapidTranfer": {
+                    "sepa": {
+                      "nickName": "Sally's Barclays Account",
+                      "accountHolderName": "XYZ Company",
+                      "bic": "ABNANL2APIP",
+                      "lastDigits": "11"
+                    }
+                  },
+                  "description": "Consumer Purchase",
+                  "customerIp": "73.82.192.17",
+                  "availableToSettle": 0,
+                  "status": "PROCESSING",
+                  "wallet": {
+                    "customerId": "abc",
+                    "slipId": "100753",
+                    "customerAccount": {
+                      "id": "xyz",
+                      "transactions": [
+                        {
+                          "id": "12321",
+                          "type": "DEPOSIT",
+                          "amount": 1000,
+                          "currencyCode": "GBP",
+                          "creationTime": "2021-07-15T17:54:12Z",
+                          "direction": "CREDIT",
+                          "paymentType": "RAPID_TRANSFER",
+                          "status": "PROCESSING",
+                          "merchantRefNum": "merchantRefNum-123"
+                        }
+                      ]
+                    }
+                  },
+                  "txnTime": "2018-12-11T16:33:49Z"
+                }
+
+
+### Lookup a Payment [/paymenthub/v1/payments/{paymentId}]
+
+#### Lookup a Payment [GET]
+
++ Request Look up a Payment details
+    + Headers
+    
+                Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
++ Parameters
+    + paymentId: 3aeb9c63-6386-46a3-9f8e-f452e722228a (string, required)
+    
++ Response 200 (application/json)
+    + Body
+    
+                {
+                  "id": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+                  "merchantRefNum": "merchantRefNum-123",
+                  "amount": 1000,
+                  "currencyCode": "GBP",
+                  "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                  "paymentType": "RAPID_TRANSFER",
+                  "rapidTranfer": {
+                    "sepa": {
+                      "nickName": "Sally's Barclays Account",
+                      "accountHolderName": "XYZ Company",
+                      "bic": "ABNANL2APIP",
+                      "lastDigits": "11"
+                    }
+                  },
+                  "description": "Consumer Purchase",
+                  "customerIp": "73.82.192.17",
+                  "availableToSettle": 0,
+                  "status": "PROCESSING",
+                  "wallet": {
+                    "customerId": "abc",
+                    "slipId": "100753",
+                    "customerAccount": {
+                      "id": "xyz",
+                      "transactions": [
+                        {
+                          "id": "12321",
+                          "type": "DEPOSIT",
+                          "amount": 1000,
+                          "currencyCode": "GBP",
+                          "creationTime": "2021-07-15T17:54:12Z",
+                          "direction": "CREDIT",
+                          "paymentType": "RAPID_TRANSFER",
+                          "status": "PROCESSING",
+                          "merchantRefNum": "merchantRefNum-123"
+                        }
+                      ]
+                    }
+                  },
+                  "txnTime": "2018-12-11T16:33:49Z"
+                }
+
+
+## Standalone Credits [/paymenthub/v1/standalonecredits]
+Standalone Credits allow merchants to issue payouts to customers.
+
+**Note:** If your merchant category code (MCC) is listed to [process Original Credits](#originalcreditrequest), you must not use Standalone Credits with credit cards.
++ Attributes (StandaloneCredit)
+
+### Process Standalone Credit [POST]
++ Request Process a Standalone Credit Using a Bank wire Transfer Payment Handle Token (application/json)
+
+    + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+
+    + Body
+
+            {
+              "amount": 400,
+              "merchantRefNum": "merchantRefNum-151",
+              "currencyCode": "EUR",
+              "paymentHandleToken": "SC9mbfZSITB5OwDJ",
+              "customerIp": "73.82.192.17",
+              "description": "Pay surplus"
+            }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+              "id": "e075f2ae-dfc4-4f6d-8d89-61158367b6a6",
+              "amount": 400,
+              "merchantRefNum": "merchantRefNum-151",
+              "paymentHandleToken": "SC9mbfZSITB5OwDJ",
+              "customerIp": "73.82.192.17",
+              "currencyCode": "EUR",
+              "paymentType": "BANK_TRANSFER",
+              "status": "PROCESSING",
+              "description": "Pay surplus",
+              "sepa": {
+                       "nickName": "Sally's Barclays Account",
+                       "accountHolderName": "John Doe",
+                       "bic": "ABNANL2APIP",
+                       "lastDigits": "00"
+              },
+              "wallet":{
+                 "customerId" : "abc",
+                 "slipId" : "100753",
+                 "verifiedInstrument" : true,
+                 "customerAccount" : {
+                    "id":"xyz",
+                    "transactions": [{
+                      "id": "12321",
+                      "type": "TRANSFER_IN",
+                      "amount": 400,
+                      "currencyCode": "EUR",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "CREDIT",
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "COMPLETED",
+                      "merchantRefNum": "merchantRefNum-151"
+                     },
+                     {
+                      "id": "12322",
+                      "type": "WITHDRAWAL",
+                      "amount": 400,
+                      "currencyCode": "EUR",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "DEBIT",
+                      "fee": 0,
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "PROCESSING",
+                      "merchantRefNum": "merchantRefNum-151"
+                     }
+                   ]
+                   },
+                  "merchantAccount" : {
+                     "id": "def",
+                    "transactions": [{
+                      "id": "12323",
+                      "type": "TRANSFER_OUT",
+                      "amount": 400,
+                      "currencyCode": "EUR",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "DEBIT",
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "COMPLETED",
+                      "merchantRefNum": "merchantRefNum-151"
+                     }
+                   ]
+                  }
+              }
+            }
+
+
++ Request Process a Standalone Credit Using Faster Payments Payment Handle Token (application/json)
+
+    + Headers
+
+            Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
+
+    + Body
+
+            {
+              "amount": 40,
+              "merchantRefNum": "merchantRefNum-151",
+              "currencyCode": "GBP",
+              "paymentHandleToken": "SC9mbfZSITB5OwDJ",
+              "customerIp": "73.82.192.17",
+              "description": "Pay surplus"
+            }
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+              "id": "e075f2ae-dfc4-4f6d-8d89-61158367b6a6",
+              "amount": 400,
+              "merchantRefNum": "merchantRefNum-151",
+              "paymentHandleToken": "SC9mbfZSITB5OwDJ",
+              "customerIp": "73.82.192.17",
+              "currencyCode": "GBP",
+              "paymentType": "BANK_TRANSFER",
+              "status": "COMPLETED",
+              "description": "Pay surplus",
+              "fasterPayments": {
+                    "accountHolderName": "John Doe",
+                    "sortCode": "321654",
+                    "lastDigits": "19"
+              },
+              "wallet":{
+                 "customerId" : "abc",
+                 "slipId" : "100753",
+                 "verifiedInstrument" : true,
+                 "customerAccount" : {
+                    "id":"xyz",
+                    "transactions": [{
+                      "id": "12321",
+                      "type": "TRANSFER_IN",
+                      "amount": 400,
+                      "currencyCode": "GBP",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "CREDIT",
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "COMPLETED",
+                      "merchantRefNum": "merchantRefNum-151"
+                     },
+                     {
+                      "id": "12322",
+                      "type": "WITHDRAWAL",
+                      "amount": 400,
+                      "currencyCode": "GBP",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "DEBIT",
+                      "fee": 0,
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "PROCESSING",
+                      "merchantRefNum": "merchantRefNum-151"
+                     }
+                   ]
+                   },
+                  "merchantAccount" : {
+                     "id": "def",
+                    "transactions": [{
+                      "id": "12323",
+                      "type": "TRANSFER_OUT",
+                      "amount": 400,
+                      "currencyCode": "GBP",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "DEBIT",
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "COMPLETED",
+                      "merchantRefNum": "merchantRefNum-151"
+                     }
+                   ]
+                  }
+              }
+
+            }
+
+
+### Lookup a Standalone Credit [/paymenthub/v1/standalonecredits/{standaloneCreditId}]
+
+#### Lookup a Standalone Credit [GET]
+
++ Request Look up a Standalone Credit details
+    + Headers
+    
+                Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
++ Parameters
+    + standaloneCreditId: e075f2ae-dfc4-4f6d-8d89-61158367b6a6 (string, required)
+    
++ Response 200 (application/json)
+    + Body
+    
+            {
+              "id": "e075f2ae-dfc4-4f6d-8d89-61158367b6a6",
+              "amount": 400,
+              "merchantRefNum": "merchantRefNum-151",
+              "paymentHandleToken": "SC9mbfZSITB5OwDJ",
+              "customerIp": "73.82.192.17",
+              "currencyCode": "GBP",
+              "paymentType": "BANK_TRANSFER",
+              "status": "COMPLETED",
+              "description": "Pay surplus",
+              "fasterPayments": {
+                    "accountHolderName": "John Doe",
+                    "sortCode": "321654",
+                    "lastDigits": "19"
+              },
+              "wallet":{
+                 "customerId" : "abc",
+                 "slipId" : "100753",
+                 "verifiedInstrument" : true,
+                 "customerAccount" : {
+                    "id":"xyz",
+                    "transactions": [{
+                      "id": "12321",
+                      "type": "TRANSFER_IN",
+                      "amount": 400,
+                      "currencyCode": "GBP",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "CREDIT",
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "COMPLETED",
+                      "merchantRefNum": "merchantRefNum-151"
+                     },
+                     {
+                      "id": "12322",
+                      "type": "WITHDRAWAL",
+                      "amount": 400,
+                      "currencyCode": "GBP",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "DEBIT",
+                      "fee": 0,
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "PROCESSING",
+                      "merchantRefNum": "merchantRefNum-151"
+                     }
+                   ]
+                   },
+                  "merchantAccount" : {
+                     "id": "def",
+                    "transactions": [{
+                      "id": "12323",
+                      "type": "TRANSFER_OUT",
+                      "amount": 400,
+                      "currencyCode": "GBP",
+                      "creationTime": "2021-07-15T17:54:12Z",
+                      "direction": "DEBIT",
+                      "paymentType": "BANK_TRANSFER",
+                      "status": "COMPLETED",
+                      "merchantRefNum": "merchantRefNum-151"
+                     }
+                   ]
+                  }
+              }
+
+            }
+
+## Transactions [/digitalwallets/v1/transactions/{transactionId}]
+
+
+Retrieve details on a transaction with the specified id. List of transactions can be fetched by calling `/transactions/{transaction-id}`.
++ Attributes (Transaction)
+
+#### Lookup a Transaction [GET]
+    
++ Request Look up a Transaction details
+    + Headers
+    
+                Authorization: "Basic YOUR-BASE64-ENCODED-API-KEY"
++ Parameters
+    + transactionId: 5040057610 (string, required)
+    
++ Response 200 (application/json)
+
+            {
+                "id": "5040057610",
+                "slipId": "5009964049",
+                "customerId": "5435323362",
+                "accountId": "5014567344",
+                "type": "TRANSFER_OUT",
+                "amount": 900,
+                "currencyCode": "GBP",
+                "fee": 100,
+                "creationTime": "2021-07-15T17:54:12Z",
+                "lastChangeDate": "2021-07-15T17:54:12Z",
+                "direction": "DEBIT",
+                "instrumentId": "1100000000000009",
+                "paymentType": "TRANSFER",
+                "status": "COMPLETED",
+                "merchantRefNum": "5040452805",
+                "balance": 50000
+            }
+
+
+
+
+# Group Webhooks
+A Webhook is an HTTP callback that is triggered when an event takes place.
+To configure webhooks, you need to [open a service request](https://merchant.paysafe.com/portal/login) with Paysafe in the Business Portal.
+
+For more information on Webhooks, click [here](https://developer.paysafe.com/en/rest-apis/paysafe-payments-api/payments-api/webhooks/).
+
+> **Note:** To receive webhooks from Paysafe, you must create a callback URL to receive the webhook that is triggered.
+You are responsible for ensuring its continued availability.
+
+**Notes on Webhooks**
+
++ When the status of one of your transaction request changes, Paysafe immediately sends a callback to your webhook's endpoint URL to inform you of the status change.
++ To acknowledge the receipt of the webhook, Paysafe expects an HTTP status of 200 OK or 202 ACCEPTED from your endpoint. In case we receive any other HTTP status code, we assume that you have not received the webhook, and we attempt to resend it.
++ If Paysafe does not get an acknowledgment of receipt with an HTTP Status Code of 200 or 202, it makes a maximum of 2 additional attempts (total 3 attempts) to send a callback to that URL.
++ As Paysafe does not have a notification method to alert you when callbacks are not reaching your endpoint URL, you should make sure that there is continued availability of your endpoint.
++ All endpoint URLs should use HTTPS/SSL to ensure security. Please note that only the default **HTTPS port 443** is supported.
++ In case you have received the same notification multiple times for an already processed event, we request you to ignore the duplicate notification. It is recommended to make the notification URL endpoints idempotent.
+
+
+
+
+## Transaction update [POST /webhook/path/at/merchant/system/callbacks/transactions]
+This webhook will be sent when the status of all transaction types is updated - deposit, withdrawal or transfers
+
++ Request Transaction update callback request (application/json)
+  + Attributes (TransactionUpdateWebhook)
+  
++ Response 202 (application/json)
+
+
+## Account update [POST /webhook/path/at/merchant/system/callbacks/accountupdate]
+The webhook is sent when there's an update on the customer account. The `operationType` signifies the change that occurred.
+
+> NOTE: For events with  `operationType ==  IBAN_ASSIGNED`, Paysafe is not able to send the `iban` field in a webhook due to information security restrictions. To obtain the IBAN, the Merchant must call the Account Information endpoint.
+
++ Request Account update callback request (application/json)
+   + Attributes (AccountUpdateWebhook)
++ Response 202 (application/json)
+
+## Payment update [POST /webhook/path/at/merchant/system/callbacks/paymentupdate]
+The webhook is sent when there's an update on the payments. The `eventType` signifies the change that occurred.
+
++ Request Payment callback request (application/json)
+   + Body 
+   
+             {
+              "resourceId": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+              "eventDate": "2021-07-15T17:54:12Z",
+              "eventType": "PAYMENT_COMPLETED",
+              "payload": {
+                "id": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+                "merchantRefNum": "testTran",
+                "amount": 1000,
+                "currencyCode": "GBP",
+                "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                "paymentType": "RAPID_TRANSFER",
+                "rapidTranfer": {
+                  "sepa": {
+                    "nickName": "Sally's Barclays Account",
+                    "accountHolderName": "XYZ Company",
+                    "bic": "ABNANL2APIP",
+                    "lastDigits": "11"
+                  }
+                },
+                "description": "Consumer Purchase",
+                "customerIp": "73.82.192.17",
+                "availableToSettle": 0,
+                "status": "COMPLETED",
+                "wallet": {
+                  "customerId": "12345",
+                  "slipId": "100753",
+                  "customerAccount": {
+                    "id": "xyz",
+                    "transactions": [
+                      {
+                        "id": "12321",
+                        "type": "DEPOSIT",
+                        "amount": 1000,
+                        "currencyCode": "GBP",
+                        "creationTime": "2021-07-15T17:54:12Z",
+                        "direction": "CREDIT",
+                        "paymentType": "RAPID_TRANSFER",
+                        "status": "COMPLETED",
+                        "merchantRefNum": "testTran"
+                      },
+                      {
+                        "id": "12321",
+                        "type": "TRANSFER_OUT",
+                        "amount": 1000,
+                        "currencyCode": "GBP",
+                        "creationTime": "2021-07-15T17:54:12Z",
+                        "direction": "DEBIT",
+                        "paymentType": "RAPID_TRANSFER",
+                        "status": "COMPLETED",
+                        "merchantRefNum": "testTran"
+                      }
+                    ]
+                  },
+                  "merchantAccount": {
+                    "id": "def",
+                    "transactions": [
+                      {
+                        "id": "12323",
+                        "type": "DEPOSIT",
+                        "amount": 1000,
+                        "currencyCode": "GBP",
+                        "creationTime": "2021-07-15T17:54:12Z",
+                        "direction": "CREDIT",
+                        "paymentType": "RAPID_TRANSFER",
+                        "status": "COMPLETED",
+                        "merchantRefNum": "testTran"
+                      }
+                    ]
+                  }
+                },
+                "txnTime": "2018-12-11T16:33:49Z"
+              }
+            }
+    
++ Response 202 (application/json)
+
+## Standalone Credit update [POST /webhook/path/at/merchant/system/callbacks/standalonecreditupdate]
+The webhook is sent when there's an update on the standalone credits. The `eventType` signifies the change that occurred.
+
++ Request Standalone Credit callback request (application/json)
+   + Body 
+   
+            {
+              "resourceId": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+              "eventDate": "2021-07-15T17:54:12Z",
+              "eventType": "SA_CREDIT_COMPLETED",
+              "payload": {
+                "id": "e075f2ae-dfc4-4f6d-8d89-61158367b6a6",
+                "amount": 400,
+                "merchantRefNum": "merchantRefNum-151",
+                "paymentHandleToken": "SC9mbfZSITB5OwDJ",
+                "customerIp": "73.82.192.17",
+                "currencyCode": "EUR",
+                "paymentType": "BANK_TRANSFER",
+                "status": "PROCESSING",
+                "description": "Pay surplus",
+                "sepa": {
+                  "nickName": "Sally's Barclays Account",
+                  "accountHolderName": "John Doe",
+                  "bic": "ABNANL2APIP",
+                  "lastDigits": "00"
+                },
+                "wallet": {
+                  "customerId": "abc",
+                  "slipId": "100753",
+                  "verifiedInstrument": true,
+                  "customerAccount": {
+                    "id": "xyz",
+                    "transactions": [
+                      {
+                        "id": "12321",
+                        "type": "TRANSFER_IN",
+                        "amount": 400,
+                        "currencyCode": "EUR",
+                        "creationTime": "2021-07-15T17:54:12Z",
+                        "direction": "CREDIT",
+                        "paymentType": "BANK_TRANSFER",
+                        "status": "COMPLETED",
+                        "merchantRefNum": "merchantRefNum-151"
+                      },
+                      {
+                        "id": "12322",
+                        "type": "WITHDRAWAL",
+                        "amount": 400,
+                        "currencyCode": "EUR",
+                        "creationTime": "2021-07-15T17:54:12Z",
+                        "direction": "DEBIT",
+                        "fee": 0,
+                        "paymentType": "BANK_TRANSFER",
+                        "status": "PROCESSING",
+                        "merchantRefNum": "merchantRefNum-151"
+                      }
+                    ]
+                  },
+                  "merchantAccount": {
+                    "id": "def",
+                    "transactions": [
+                      {
+                        "id": "12323",
+                        "type": "TRANSFER_OUT",
+                        "amount": 400,
+                        "currencyCode": "EUR",
+                        "creationTime": "2021-07-15T17:54:12Z",
+                        "direction": "DEBIT",
+                        "paymentType": "BANK_TRANSFER",
+                        "status": "COMPLETED",
+                        "merchantRefNum": "merchantRefNum-151"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+    
++ Response 202 (application/json)
+
+
+# Data Structures
+
+
+## Wallet (object)
++ customer (Customer)
++ accounts (array[Account])
++ risk (object)
+    + customerRiskRating: 50 (number, required) - risk rating for the customer
+    + isScaPerformed: false (boolean, optional)
+    + isCustomerIPTrusted: false (boolean, optional)
+    + isBeneficiaryTrusted: false (boolean, optional)
++ customerIp: 192.0.250 (string, required)- IPv4 address from which customer intiated this request.
+  _IPv4_
+
+
+## Customer (object)
++ id: 5435323362 (string, optional)
++ firstName: John (string, required)
+    _length<=50_
++ lastName: Doe (string, required)
+    _length<=50_
++ title (string, optional) - Personal title, Mr., Dr., etc.
+    _length<=15_
++ One Of
+  + email: john.doe@example.com (string, required) - Primary email address; At least one of **`email` or `mobile` is required** when creating a new wallet!
+    _length<=150_
+  + mobile (string, required) - Mobile phone number; At least one of **`email` or `mobile` is required** when creating a new wallet!
+    _length<=50_
++ address1: 23 Four Street (string, required)
+    _length<=200_
++ address2 (string, optional)
+    _length<=200_
++ city (string, optional)
+    _length<=100_
++ zip: LE14 (string, required)
+    _length<=30_
++ state (string, optional)
+    _length<=100_
++ countryCode: GB (string, required) - ISO-3166 Alpha 2 country code
+    _length==2_
++ birthDate: `1999-08-24` (string, required)
+    _ISO 8601 date_
++ registrationIp: 192.0.250 (string, required) - IPv4 address from which the customer orginally registered.
+    _IPv4_
++ registrationDate (string, optional) - Date of registration at the Merchant system
+    _ISO 8601 datetime_
++ nationality: GB (string, required) - ISO-3166 Alpha 2 country code
+    _length==2_
++ externalId: `d6f475fe-57c9-4865-9316-0c3b8e8128d4` (string, required) - Any external id, e.g. UUID or a numeric id
+    _length==40_
++ kyc (object, required)
+    + status: COMPLETED (enum[string], required) - KYC Status
+        + COMPLETED
+        + IN_PROGRESS
+        + NOT_COMPLETED
+    + idVerification (object, optional) idVerification is not performed, do not send this object
+        + status (enum[string], optional)
+            + COMPLETED
+            + IN_PROGRESS
+            + NOT_COMPLETED
+    + addressVerification (object, optional) - If addressVerification is not performed, do not send this object
+        + status (enum[string], optional)
+            + COMPLETED
+            + IN_PROGRESS
+            + NOT_COMPLETED
+    + faceMatch (object, optional) - If faceMatch is not performed, do not send this object
+        + status (enum[string], optional)
+            + COMPLETED
+            + IN_PROGRESS
+            + NOT_COMPLETED
+    + EDD (object, optional) - If EDD is not performed, do not send this object
+        + status (enum[string], optional)
+            + COMPLETED
+            + IN_PROGRESS
+            + NOT_COMPLETED
+        + date (string, optional)
+    + pep (object, optional) - If pep screening is not performed, do not send this object
+        + `status` (enum[string], required)
+            + NOT_SCREENED
+            + MATCH
+            + NO_MATCH
+            + RESOLVED
+            + DISMISSED
+            + IN_PROGRESS
+        + lastScreenDate: `2021-07-19T13:23:41Z` (string, optional)
+        + reason (string, optional)
+    + sanctions (object, optional) - If sanctions screening is not performed, do not send this object
+        + status (enum[string], required)
+            + NOT_SCREENED
+            + MATCH
+            + NO_MATCH
+            + RESOLVED
+            + DISMISSED
+            + IN_PROGRESS
+        + lastScreenDate: `2021-07-19T13:23:41Z` (string, optional)
+        + reason (string, optional)
+    + addressVerificationDocumentsReceived (array, optional)
+        + (enum[string])
+            + Members
+                + `BANK_STATEMENT`
+                + `CREDIT_CARD_STATEMENT`
+                + `UTILITY_BILL`
+                + `CREDIT_CARD`
+                + `PHONE_BILL`
+                + `TAX_RETURN`
+                + `COUNCIL_BILL`
+                + `SCHOOL_ENROLLMENT_LETTER`
+                + `COURT_DOCUMENT`
+                + `PENSION_DOCUMENT`
+                + `LEASE_TENANT_CONTRACT`
+                + `OTHER_AV_DOCUMENT`
+                + `CUSTOM_AV_DOCUMENT`
+
++ type (enum[string], required) - Type of Customer
+    + `PERSON`
+    + `LEGAL_ENTITY`
++ legalEntityName (string, optional)
++ legalEntityIdentifier (string, optional)
+
+
+## RapidTransferBankList (object)
++ rapidTransferBanks (array[RapidTransferBank], required)
+
+
+## RapidTransferBank (object)
++ id: 1000203 (string, required) - code for the bank
++ bic: NWBKGB2L (string, optional) - the BIC of the bank
++ name: Natwest UK (string, required) - name of the bank, can be displayed to the customer
++ isAccountRequiredBeforeInitialization: `true` (boolean, required) - whether the bank integration requires the account number / IBAN to be specified before taking the customer to the bank, or the bank requires the customer to select the account within the bank's UI
++ limit: 15000000 (string, optional) - in minor currency units; the max limit supported for this bank integration; if `null`, the bank has not imposed a hard limit on bank transfers
++ country: GB (string, required)
+
+
+## Account (object)
++ id: 42342355 (string, optional)
++ externalId: `merchant-id` (string, optional) - The Merchant id for the customer
++ currencyCode: GBP (string, required) - Currency alphabetic code as specified by ISO 4217
++ hasIban: true (boolean, optional)
++ iban: NL74ABNA1231242344 (string, optional) - IBAN associated with this account.
++ totalBalance: 0 (number, optional) - Amount in minor units
++ availableBalance: 0 (number, optional) - Amount in minor units
++ creationTime: `2019-08-24T14:15:22Z` (string, optional)
+
+
+## PaymentHandle (object)
++ id:`26359efd-7cfb-4014-a13d-1724e3ff17fa` (string) - This is the ID returned in the response. This ID can be used for future associated requests, for example, to look up the Payment Handle.
+    _length<=36_
++ merchantRefNum: `merchantRefNum-101` (string, required) - This is the merchant reference number created by the merchant and submitted as part of the request. It must be unique for each request.
+    _length<=255_
++ paymentType: RAPID_TRANSFER (enum, required) - This is the payment type associated with this Payment Handle. If applicable, you need to pass the corresponding payment type object as listed after this parameter.
+    + Members
+        + RAPID_TRANSFER
+        + CARD
+        + BANK_TRANSFER
+        + FASTER_PAYMENTS
++ amount: 1000 (string, required) - This is the amount of the request, in minor units. **Note:** This field is mandatory if *transactionType* is included. The *amount* specified in the Payment Handle request must match the *amount* specified in the Payments API request the *paymentHandleToken* is used for.
+    _Max=99999999999_
++ currencyCode:`GBP` (string, required) - This is the [currency of the merchant account](#currencycodes), for example, USD or CAD. **Note:** This field is mandatory if *transactionType* is included. The *currencyCode* specified in the Payment Handle request must match the *currencyCode* specified in the Payments API request the *paymentHandleToken* is used for.
+    _max=3_
++ profile (object)
+    + firstName: Jane (string, required) - This is the customer's first name.
+        _length<=80_
+    + lastname: Doe (string, required) - This is the customer's last name.
+        _length<=80_
+    + locale (enum, optional) - This indicates the customer's locale.
+        + Members
+            + en_US
+            + fr_CA
+            + en_GB
+    + dateOfBirth (object, optional)
+        + day: 22 (number, optional) - This is the day of birth.
+            _length=2_
+        + month :4 (number, optional) - This is the month of birth.
+            _length=2_
+        + year: 1980 (number, optional) - This is the year of birth. Minimum value for this property is 1900.
+            _length=4_
+    + email (string, optional) - This is the customer's email address.
+        _length<=255_
+    + phone (string, optional) - This is the customer's phone number.
+        _length<=40_
+    + mobile (string, optional) - This is the customer's mobile phone number.
+        _length<=40_
+    + gender (enum, optional) - This is the customer's gender.
+        - F
+        - M
+    + nationality (string, optional) - This is the customer's nationality.
+        _length<=30_
++ billingDetails (object, optional)
+    + street: 100 Queen (string, required)  - This is the first line of the street address in the billing address.
+         _length<=50_
+    + street2 (string, optional) - This is the second line of the street address in the billing address, if required (for example, apartment number).
+        _length<=50_
+    + city (string, optional) - This is the city in the billing address.
+         _length<=40_
+    + zip:`MSH 2N2` (string, required) - This is the postal/zip code in the billing address.
+         _length<=10_
+    + country: GB (string, required) - This is the country where the address is located. See [Country Codes](#countrycodes).
+         _length=2_
+    + state (string, optional) - This is the state or province of the billing address. For Canada see [Province Codes](#provincecodes). For the United States see [State Codes](#statecodes). Other countries have no restrictions.
+        _length<=40_
+    + phone (string, optional) - This is the customer's telephone number.
+        _length<=40_
+    + nickName (string, optional) - This is the nickname the merchant has for the billing address.
++ paymentHandleTokenFrom (string, optional) - This is an existing [Payment Handle token created for a customer](#createcustomerpaymenthandlerequest), from which payment instrument and profile details can be retrieved.
+    _length<=36_
++ returnLinks (object) - The URL endpoints to redirect the customer to after a redirection to an alternative payment or 3D Secure site. You can customize the return URL based on the transaction status.
+    + rel: default (enum) - This is the link type, allowing different endpoints to be targeted depending on the end state of the transaction. The link relation describes how this link relates to the previous call.
+        + default (string, required) - The default return URL that will be used if specific status return URL is not defined.
+        + on_completed (string) - Will be returned to this URL if the payment is completed.
+        + on_failed (string) - Will be returned to this URL if the payment fails.
+    + href: `https://somemerchant.com/redirect' - The redirect URL
+    + method: GET (enum) - The HTTP method
+        + POST
+        + GET
++ customerIp:`73.82.192.17` (string) - This is the customer's IP address.
+    _length<=39_
++ transactionType: PAYMENT (enum, required) - This specifies the transaction type for which the Payment Handle is created.
+    + Members
+        + PAYMENT - Payment Handle is created to continue the Payment.
+        + STANDALONE_CREDIT - Payment Handle is created to continue the Standalone Credit.
+        + ORIGINAL_CREDIT - Payment Handle is created to continue the Original Credit.
+        + VERIFICATION - Payment Handle is created to continue the Verification request.
++ One of
+    + rapidTransfer (object) - These are the details of the Rapid Transfer.
+        + sepa (object)
+            + nickName: `Sally's Barclays Account` (string) - This is an alias for this bank account.
+                _length<=50_
+            + accountHolderName: `XYZ Company` (string, required) - This is the name of the customer or company that owns the bank account.
+                 _length<=32_
+            + bic: `ABNANL2APIP` (string) - This is the Bank Identifier Code for the consumer's bank account.
+                 _length=8-11_
+            + One of
+                + iban: `DE89370400440532013000` (string, optional) - This is the International Bank Account Number for the costumer's bank account.
+                    _length=8-34_
+                + rapidTransferBankId: 1000203 (string, optional) - This is the bank code returned when requesting available rapid transfer banks.
+            + lastDigits:`11` (string) - These are the last two digits of the iban.
+                _length=2_
+    + card (object)
+        + cardNum:`4111111111111111` (string, required) - This is the card number used for the request.
+             _length=8-20_
+        + cardExpiry (object) - This is the card's expiration date
+            + month:12 (number) - This is the card expiration month.
+                _length=2_
+            + year:2020 (number) - This is the card expiration year.
+                _length=4_
+        + cvv:`123` (string) - This is the 3- or 4-digit security code that appears on the card following the card number.
+            _Conditional, length=3-4_
+        + holdername:`Jane Smith` (string) - This is the name of the card holder.
+            _Read Only_
+        + cardType (enum) - This is type of card used for the request.
+            _Read Only_
+            - AM – American Express
+            - DI – Discover
+            - JC – JCB
+            - MC – Mastercard
+            - MD – Maestro
+            - SO – Solo
+            - VI – Visa
+            - VD – Visa Debit
+            - VE – Visa Electron
+        + lastDigits (string) - These are the last four digits of the card used for the request.
+            _length=4_
+        + nickName (string) - This is the nickname the merchant has for the card holder.
+            _length<=50_
+        + cardBin (string) - This is the card BIN (typically the first 6 digits).
+            _length=6_
+    + sepa (object) - These are the details of the [sepa](#sepaobject) used for the request.
+        + nickName: `Sally's Barclays Account` (string) - This is an alias for this bank account.
+            _length<=50_
+        + accountHolderName: `XYZ Company` (string, required) - This is the name of the customer or company that owns the bank account.
+            _length<=32_
+        + bic: `ABNANL2APIP` (string) - This is the Bank Identifier Code for the consumer's bank account.
+            _length=8-11_
+        + iban: `DE89370400440532013000` (string, optional) - This is the International Bank Account Number for the costumer's bank account.
+                _length=8-34_
+        + lastDigits: `11` (string) - These are the last two digits of the iban.
+            _length=2_
+    + fasterPayments (object) - These are the details of the [fasterPayments](#fasterpaymentsobject) used for the request.
+        + accountHolderName: `XYZ Company` (string, required) - This is the name of the customer or company that owns the bank account.
+            _length<=140_
+        + sortCode: `321654` (string, required) - This is the sortcode for the consumer's bank account.
+            _ length=6_
+        + accountNumber: `98877219` (string, required) - This is the Bank Account Number for the costumer's bank account.
+            _length=8-10_
+        + lastDigits:`11` (string) - These are the last two digits of the account number.
+            _length=2_
++ wallet (object)
+    + customerId: abcd (string) - The customer id.
+        _length<=50_
+    + slipId: 123456 (string) - The transaction id at wallet side.
+        _length<=50_
+    + verifiedInstrument: `false` (boolean) - It specifies if the instrument (card, sepa, fasterPayments etc) has been previously verfied.
+The default value for this is false. If this is specified as false, Paysafe will verify the instrument and rejects the transaction, if the verification fails.
+This is applicable only for STANDALONE_CREDIT.   
+    + customerAccount (object) : Customer Wallet Account.
+        + id: `def` (string) - The customer wallet account id. If this is not provided, a wallet account id is automatically created in the processing currency. If provided, and processing currency specified is different than the wallet account currency, then an error is returned.
+                       In the case of Standalone Credits, this field is mandatory. If there is insufficient funds in the specified account, then an error is returned for Standalone Credit.
+            _length<=50_
++ paymentHandleToken:`842778a0-03a2-11e9-8eb2-f2801f1b9fd1` (string) - This is the payment token generated by Paysafe that will be used by merchants for Payment API requests.
+    _length<=36_
++ status (enum) - This is the status of the transaction request.
+    + Members
+        + RECEIVED - Paysafe has received the request and is waiting for the downstream processor’s response.
+        + INITIATED - The transaction was initiated with the downstream provider.
+        + PAYABLE - The merchant can use the Payment Handle for a Payment request.
+        + PROCESSING - The Payment Handle was authorized by customer, awaiting PSP response.
+        + FAILED - The transaction failed due to either an error or being declined.
+        + CANCELLED - The authorization request has been fully reversed.
+        + EXPIRED - The Payment Handle expired because the merchant did not proceed with the Payment request.
+        + COMPLETED - The Payment request was initiated successfully using the Payment Handle.
++ usage: SINGLE_USE (enum) - This specifies how the Payment Handle will be used for Payments.
+    + Members
+        + SINGLE_USE - The Payment Handle can be used for one transaction only and expires if not used.
++ action: REDIRECT (enum) - This specifies the next step of the user journey once they proceed to the Payment.
+    + Members
+        + NONE
+        + REDIRECT
++ executionMode: SYNCHRONOUS (enum) - This specifies the action of the merchant server in order to complete the Payment.
+    + Members
+        + ASYNCHRONOUS - The Payment request is not completed immediately and the merchant [must rely on webhooks](#paymentswebhooks) to retrieve the status of the Payment request.
+        + SYNCHRONOUS - The status of the Payment request will be returned synchronously to the merchant, for example, a credit card request.
++ links (object) - This is an array of links related to the resource.
+    + `rel`:`redirect_payment` (enum)
+    + `href`:`http://api.paysafe.com/card/redirect/372b5ee7-6360-4403-b444-164f8f1d2709`
+    + `method`:`GET`
++ timeToLiveSeconds: 899 (number) - This is the period of time, in seconds, the *paymentHandleToken* is valid before expiration.
+    _length<=899_
+
+
+## Payment (object)
++ id: `3aeb9c63-6386-46a3-9f8e-f452e722228a` (string) - This is the ID returned in the response. This ID can be used for future associated requests, for example, looking up the Payment.
+    _length<=36_
++ merchantRefNum: 'merchantRefNum-101` (string, required) - This is the merchant reference number created by the merchant and submitted as part of the request. It must be unique for each request.
+    _length<=255_
++ amount: 1000 (number, required) - This is the amount of the request, in minor units. **Note:** The *amount* specified in the Payment request must match the *amount* specified in the Payment Handle request from which the *paymentHandleToken* is taken.
+    _max=99999999999_
++ currencyCode: GBP (string, required) - This is the [currency of the merchant account](#currencycodes), for example, USD or CAD. **Note:** The *currencyCode* specified in the Payment request must match the *currencyCode* specified in the Payment Handle request from which the *paymentHandleToken* is taken.
+    _max=3_
++ settleWithAuth (boolean, optional) - This indicates whether the request is an Authorization only (no Settlement) or a Purchase (Authorization and Settlement). Default: true
++ paymentHandleToken:`842778a0-03a2-11e9-8eb2-f2801f1b9fd1` (string, required) - This is the payment token generated by Paysafe that will be used for the Payment request.
+    _length<=36_
++ paymentType: `RAPID_TRANSFER` (enum) - This is the payment type associated with the Payment Handle used for this request.
+    + CARD
+    + RAPID_TRANSFER
++ One of
+    + rapidTranfer (object) - These are the details of the Rapid Transfer.
+        + sepa (object) - These are the details of the [sepa](#sepaobject) used for the request.
+            + nickName: Sally's Barclays Account (string) - This is an alias for this bank account.
+                _length<=50_
+            + accountHolderName: XYZ Company (string) - This is the name of the customer or company that owns the bank account.
+                 _length<=32_
+            + bic: ABNANL2APIP (string) - This is the Bank Identifier Code for the consumer's bank account.
+                _length=8-11_
+            + lastDigits: 11 (string) - These are the last two digits of the iban.
+                _length=2_
+    + card (object) - These are the details of the [card](#cardobject) used for the request. Only one payment instrument object (for example, *card* or *paysafecash* or *sightline*) can be included in the request.
+        + cardExpiry (object) - This is the card's [expiry date](#cardexpiryobject).
+            + month: 12 (number) - This is the card expiry month.
+                _length=2_
+            + year:2020 (number) - This is the card expiry year.
+                _length=4_
+        + holdername: Jane Smith (string) - This is the name of the card holder.
+        + cardType (enum) - This is type of card used for the request.
+            - AM – American Express
+            - DI – Discover
+            - JC – JCB
+            - MC – Mastercard
+            - MD – Maestro
+            - SO – Solo
+            - VI – Visa
+            - VD – Visa Debit
+            - VE – Visa Electron
+        + lastDigits: 1111 (string) - These are the last four digits of the card used for the request.
+            _length=4_
+        + nickName: `Jane's Card` (string) - This is the nickname the merchant has for the card holder.
+            _length<=50_
+        + cardBin: 411111 (string) - This is the card BIN (typically the first 6 digits).
+            _length=6_
++ description: Consumer Purchase (string) - This is a description of the transaction, provided by the merchant.
+    _length<=255_.
++ customerIp: 73.82.192.17 (string) - This is the customer's IP address.
+    _length<=39_
++ availableToSettle: 0 (number) - This is the amount of the Authorization remaining to settle, in minor units.
++ status (enum) - This is the status of the transaction request.
+    + Members
+        + RECEIVED - Our system has received the request and is waiting for the downstream processor’s response.
+        + COMPLETED - The request was completed.
+        + HELD - The request has been placed on hold due to risk considerations.
+        + FAILED - The transaction failed, due to either an error or being declined.
+        + CANCELLED - The request has been reversed.
+        + PENDING - The transaction awaiting payment service provider's response.
++ statusReason - This is reason for the status. This is present in case of ERROR, FAILURE, HELD status.
+    _length<=255_
++ wallet (WalletTransaction) 
++ txnTime: `2018-12-11T16:33:49Z` (string) - This is the date and time the transaction was processed.
++ gatewayResponse (object)
+    + code (string) - This is acquirer identification code, such as DJN, CRX, etc.
+    + id (string) - This is transaction id at PSP side, in case of APMs.
+    + responseCode (string) - This is the raw response returned by the acquirer.
+    + avsCode (string) - This is the raw AVS code returned by the acquirer.
+    + avsResponse (string) - This is the AVS response returned from the card issuer.
+    + balanceResponse (string) - This is the balance remaining on a gift card, if a gift card was used for the original transaction.
+    + mid (string) - This is the acquirer MID that was sent to the clearing house._
+    + terminalId (string) - This is the merchant's terminal ID.
+    + batchNumber (string) - This is the batch number.
+    + seqNumber (string) - This is the merchant's sequence number.
+    + effectiveDate (string) - This is the date of the bank deposit associated with the transaction.
+    + financingType (string) - This is the type of financing offered.
+    + plan (string) - This is the plan number for the financing transaction.
+    + gracePeriod (string) - This is the grace period, in months, associated with deferred payment transactions.
+    + term (string) - This is the number of payments, in months, for equal payment transactions.
+    + responseId (string) - This is the response ID assigned by Credorax.
+    + requestId (string) - This is the request ID assigned by Paysafe.
+    + description (string) - This is a description of the response.
+    + authCode (string) - This is the authorization code.
+    + txnDateTime (string) - This is the transaction date and time.
+    + referenceNbr (string) - This is the bank net transaction Id/Merch Tran Ref
+    + responseReasonCode (string) - This is the raw response reason code returned by Credorax.
+    + cvvVerification (string) - This is the response to the cvv submitted with the transaction request.
+    + cvv2Result (string) - This is the raw cvv2 result code.
++ riskReasonCode: 1001 (array) - An array of integers is returned, displaying the detailed risk reason codes when your transaction was declined. It is returned only when your account is configured accordingly.
++ storedCredential (object)
+    + type: ADHOC (enum) - This specifies the type of request being made.
+        + ADHOC – Ad hoc consumer-initiated request.
+        + TOPUP – Unscheduled merchant initiated request when a consumer balance is below a set limit.
+        + RECURRING –  Scheduled merchant initiated recurring requests.
+    
+        + Default: ADHOC
+    + occurrence: RECURRING (enum) - This specifies whether the stored credential request is initial or recurring.
+        + INITIAL – Used when this is the first time the consumer uses this credit card.
+        + SUBSEQUENT – Used when the consumer uses this credit card for subsequent requests.
+    
+        + Default: INITIAL
++ settlements (array) - This is the list of all Settlements. This will be returned only if *settleWithAuth* = *true* in the request.
++ error (object)
+    + `code`:`5016` (string) - This is the error code.
+    + `message`:`Account not found.` (string) - This is the description of the error.
+    + `fieldErrors` (array) - This is a list of fields that have issues.
+        + `field`:`amount` (string) - Field name.
+        + `error`:`Contain invalid characters` (string)  - Error associated with the field name.
++ authentication (object)
+    + `id`:`5d4db3bc-34c9-417f-a051-0d992ad9284e` (string) - This is the ID of authentication, returned in the response.
+        _Read Only, length<=36_
+    + `eci`:`5` (number) - This is the [E-Commerce Indicator](#authenticationobject).
+    + `cavv`:`AAABBhkXYgAAAAACBxdiENhf7A+=` (string) - This is the Cardholder Authentication Verification Value, indicating that the transaction has been authenticated.
+        _Read Only, length<=80_
+    + `xid`:`aWg4N1ZZOE53TkFrazJuMmkyRDA=` (string) - This is the transaction identifier returned by the card issuer.
+        _Read Only, length<=40_
+    + `status` (enum) - This is the status of authentication request.
+        _Read Only_
+        + Members
+            + COMPLETED
+            + FAILED
+    + `merchantRefNum`:`merchantABC-123-authentications` (string) - This is the merchant reference number for the authentication request.
+        _Read Only, length<=255_
+    + `threeDEnrollment`:`Y` (enum) - This indicates whether or not the cardholder is enrolled in 3D Secure.
+        _Read Only_
+        + Members
+            + Y - Cardholder authentication available
+            + N - Cardholder not enrolled in authentication
+            + U - Cardholder authentication unavailable
+    + `threeDResult`:`Y` (enum) - This indicates the outcome of the Authentication.
+        _Read Only_
+        + Members
+            + Y - The cardholder successfully authenticated with their card issuer.
+            + A - The cardholder authentication was attempted.
+            + N - The cardholder failed to successfully authenticate with their card issuer.
+            + U - Authentication with the card issuer was unavailable.
+            + E - An error occurred during authentication.
+    + `signatureStatus`:`Y` (enum) - This is the 3D Secure signature verification result value.
+        _Read Only_
+        + Members
+            + Y - All transaction and signature checks satisfied.
+            + N - At least one transaction or signature check failed.
+    + error (object)
+        + `code`:`5016` (string) - This is the error code.
+        + `message`:`Account not found.` (string) - This is the description of the error.
+        + `fieldErrors` (array) - This is a list of fields that have issues.
+            + `field`:`amount` (string) - Field name.
+            + `error`:`Contain invalid characters` (string)  - Error associated with the field name.
+    
+
+## StandaloneCredit (object)
++ id:`25f6dadf-176a-415f-95c9-6ff39ff697ba` (string) - This is the ID returned in the response. This ID can be used for future associated requests, e,g., lookups.
+    _length<=36_
++ merchantRefNum:`merchantRefNum-101` (string, required) - This is the merchant reference number created by the merchant and submitted as part of the request. It must be unique for each request.
+    _length<=255_
+
++ paymentHandleToken:`842778a0-03a2-11e9-8eb2-f2801f1b9fd1` (string, required) - This is the payment token generated by Paysafe that will be used for the request.
+    _length<=36_
++ amount:`1000` (string, required) - This is the amount of the request, in minor units. **Note:** The *amount* specified in the Credit request must match the *amount* specified in the Payment Handle request from which the *paymentHandleToken* is taken.
+    _Max =99999999999_
++ currencyCode:`CAD` (string, required) - This is the [currency of the merchant account](#currencycodes), for example, USD or CAD. **Note:** The *currencyCode* specified in the Credit request must match the *currencyCode* specified in the Payment Handle request from which the *paymentHandleToken* is taken.
+    _max=3_
++ txnTime:`2018-12-11T16:33:49Z` (string) - This is the date and time the transaction was processed.
+    _Read Only_
++ paymentType: `CARD` (enum) - This is the payment type associated with the Payment Handle used for this request.
+    + Members
+        + BANK_TRANSFER
++ wallet (WalletTransaction)
++ One of
+    + sepa (object) - These are the details of the [sepa](#sepaobject) used for the request.
+        + nickName: `Sally's Barclays Account` (string) - This is an alias for this bank account.
+            _length<=50_
+        + accountHolderName: `XYZ Company` (string, required) - This is the name of the customer or company that owns the bank account.
+            _length<=32_
+        + bic: `ABNANL2APIP` (string, required) - This is the Bank Identifier Code for the consumer's bank account.
+            _length=8-11_
+        + iban: `DE89370400440532013000` (string, required) - This is the International Bank Account Number for the costumer's bank account.
+            _length=8-34_
+        + lastDigits:`11` (string) - These are the last two digits of the iban.
+            _length=2_
+
+    + fasterPayments (object) - These are the details of the [fasterPayments](#fasterpaymentsobject) used for the request.
+        + accountHolderName: `XYZ Company` (string, required) - This is the name of the customer or company that owns the bank account.
+         _length<=140_
+        + sortCode: `321654` (string, required) - This is the sortcode for the consumer's bank account.
+            _length=6_
+        + accountNumber: `98877219` (string, required) - This is the Bank Account Number for the costumer's bank account.
+        _length=8-10_
+        + lastDigits:`11` (string) - These are the last two digits of the account number.
+            _length=2_
++ status: PENDING (enum) - This is the status of the transaction request.
+    + Members
+        + INITIATED - The transaction was initiated with the downstream provider.
+        + PENDING - The transaction awaiting payment service provider's response.
+        + FAILED - The transaction failed, due to either an error or being declined.
+        + CANCELLED - The authorization request has been fully reversed.
+        + EXPIRED - The request expired.
+        + COMPLETED - The request was completed.
+        + RECEIVED - Our system has received the request and is waiting for the downstream processor’s response.
++ `description`:`Purchase Credit` (string) - This is a description of the transaction, provided by the merchant.
+    _length<=255_
++ `customerIp`:`73.82.192.17` (string) - This is the customer's IP address.
+    _length<=39_
+
+
+## WalletTransaction (object)
++ customerId: abcd (string) - The customer id.
+    _length<=50_
++ fee: `400` (number) - The fee to be applied on this transactions.
++ slipId: 123456 (string) - The transaction id at wallet side.
+    _length<=50_
++ customerAccount (object) - Customer wallet account.
+    + id: 12311 (string) - The wallet account id.
+    _length<=50_
+    + transactions (array,fixed-type) - An array of transactions
+        + (object)
+            + type: 'GROSS_AMOUNT` (string) - The type of the posting.
+                _length<=50_
+            + direction: CREDIT (enum) - The direction of the amount.
+                + DEBIT
+                + CREDIT
+                _length<=50_
+            + amount: 500 (number) - Amount posted to/from wallet account.
++ merchantAccount (object) - Merchant wallet account.
+    + id: 12311 (string) - The wallet account id.
+    _length<=50_
+    + transactions (array,fixed-type) - An array of transactions
+        + (object)
+            + type: 'GROSS_AMOUNT` (string) - The type of the posting.
+                _length<=50_
+            + direction: CREDIT (enum) - The direction of the amount.
+                + DEBIT
+                + CREDIT
+                _length<=50_
+            + amount: 500 (number) - Amount posted to/from wallet account.
+
+## Transaction (object)
++ id: 544232 (string, optional) - Transaction id
++ merchantRefNum: abcd1234 (string, optional) - Merchant reference number associated witht the transaction.
++ customerId: 1234 (string, optional) - Wallet customer id.
++ accountId: 212345 (string, optional) - Account Id associated with this transaction.
++ type: DEPOSIT (enum[string], optional)
+        + `DEPOSIT`
+        + `WITHDRAWAL`
+        + `CHARGEBACK_REVERSAL`
+        + `RETURNED_WITHDRAWAL`
+        + `CHARGEBACK`
+        + `MERCHANT_FEE`
+        + `TRANSACTION_FEE`
+        + `CANCELATION`
+        + `TRANSFER_IN`
+        + `TRANSFER_OUT`
++ slipId: 121345 (string, optional) - Transaction Slip Id.
++ amount: 1000 (number, optional) - Transaction amount in minor units.
++ currencyCode: EUR (string, optional) - Currency alphabetic code as specified by ISO 4217
++ creationTime: `2021-07-15T17:54:12Z` (string, optional)
++ direction (enum[string], optional) - Transaction direction.
+        + `CREDIT`
+        + `DEBIT`
++ paymentType (enum[string], optional)
+    
+        Type of instrument. Used as discriminator for different Payment Insturment types.
+    
+          * CARD
+          * BANK_TRANSFER
+          * RAPID_TRANSFER
+    
+        + CARD
+        + BANK_TRANSFER
+        + RAPID_TRANSFER
++ instrumentId (string, required)
++ description: Transaction description. (string, optional) - Transaction description.
++ status (enum[string], optional)
+    + PENDING
+    + PROCESSING
+    + COMPLETED
+    + FAILED
+    + CANCELLED
++ statusReason (enum[string], optional) - For non-successful transactions, this field might contain the reason
+    + INSUFFICIENT_FUNDS
+    + RISK_ENGINE_DECLINE
+    + CUSTOMER_RESTRICTED
+
+## TransactionUpdateWebhook (object)
++ id (string, required) - id of the change event
++ timestamp: `2021-07-15T17:54:12Z` - ISO timestamp
++ transaction (Transaction)
+
+## AccountUpdateWebhook (object)
++ id: 00000003630052156492 (string, required) - id of the change event
++ timestamp: `2021-07-15T17:54:12Z` - ISO timestamp
++ operationType: IBAN_ASSIGNED (enum[string], required)
+    + `IBAN_ASSIGNED`
++ account (object, required)
+  + id: 5040057608 (string, required)
+  + customerId: 500014306996 (string, required)
+
+## PaymentUpdateWebhook (object)
++ resourceId (string, required) - id of the Payment
++ eventDate: `2021-07-15T17:54:12Z` - ISO timestamp
++ eventType: PAYMENT_PROCESSING (enum[string], required) - Event type.
+    + 'PAYMENT_PROCESSING'
+    + 'PAYMENT_COMPLETED'
+    + 'PAYMENT_CANCELLED'
+    + 'PAYMENT_FAILED'
++ payload (Payment)
+
+## StandaloneCreditUpdateWebhook (object)
++ resourceId (string, required) - id of the Payment
++ eventDate: `2021-07-15T17:54:12Z` - ISO timestamp
++ eventType: PAYMENT_PROCESSING (enum[string], required) - Event type.
+    + 'PAYMENT_PROCESSING'
+    + 'PAYMENT_COMPLETED'
+    + 'PAYMENT_CANCELLED'
+    + 'PAYMENT_FAILED'
++ payload (StandaloneCredit)
