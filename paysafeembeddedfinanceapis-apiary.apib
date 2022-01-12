@@ -73,6 +73,100 @@ For example, using the above Key Username and Password, the header is formed as 
 ```Authorization: Basic TWVyY2hhbnRYWVo6Qi10c3QxLTAtNTFlZDM5ZTQtMzEyZDAyMzQ1ZDNmMTIzMTIwODgxZGZmOWJiNDAyMGE4OWU4YWM0NGNkZmRjZWNkNzAyMTUxMTgyZmRjOTU yMjcyNjYxZDI5MGFiMmU1ODQ5ZTMxYmIwM2RlZWRlN2U=```
 For additional details, please refer [Authentication](https://developer.paysafe.com/en/rest-apis/reference-information/important-integration-concepts/authentication/).
 
+<a name="gettingstarted" title="Getting started"></a>
+## Getting started
+
+### Deposit with instant bank transfer - RapidTransfer
+
+Paysafe offers to the Merchant a Real-time bank transfer solution for the smaller basket size transfers. Rapid Transfer payments are normally instant however a small percentage of high risk transactions may have delayed processing (up to 3 business days). Pilot countries UK, Estonia, Latvia, Portugal.
+
+Transaction limits for Rapid Transfer
+| Daily     | Weekly    | Monthly    |
+|-----------|-----------|------------|
+| 5,000 EUR | 7,500 EUR | 25,000 EUR |
+
+* Merchant will show the Rapid Transfer payment method to their customers alongside the other deposit options.
+
+* Merchant calls Paysafe's available banks API for Rapid Transfer and show the banks list to customer for selection.
+
+* Customer selects the bank from the list. 
+
+* Merchant will send a payment handle request to Paysafe with the required details like customer selected bank id and will redirect the customer to the Rapid Transfer redirect url returned by Paysafe.
+
+* Rapid Transfer payment flow will assist the customer to authenticate with their bank, validate payment account and confirm a bank transfer to Paysafe.
+
+* Customer will be redicted back to Merchant page once the customer authenticates the payment in RT page. Paysafe will send the proper webhooks for Payment Handles and Transactions with proper statuses well.
+
+* Merchant has to do a Payment call using the Payment Handle.
+
+* Paysafe will credit the amount to customer’s wallet and then transfer the same amount from customer's wallet to merchant's wallet.
+
+&nbsp;
+
+Deposit with Rapid Transfer for instant confirmation transactions
+
+![Diagram: Deposit with RapidTransfer for low risk transactions](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_rt_low_risk.png)
+
+&nbsp;
+
+&nbsp;
+
+Deposit with Rapid Transfer for delayed confirmation transactions
+
+![Diagram: Deposit with RapidTransfer for high risk transactions](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_rt_high_risk.png)
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+### Deposit with a bank transfer
+
+Paysafe will support Merchant's customers with digital wallets to transfer money from their own bank accounts to their vIBANs in Paysafe partner bank. Once offline customer deposit reaches Paysafe partner bank, merchant's wallet will be funded.
+
+* Merchant will show vIBAN and Paysafe entity as account holder upon bank transfer payment option on Merchant website
+
+* Paysafe will perform vIBAN and names match when deposit received in Paysafe partner bank
+
+* The transaction amount will be credited to the consumers Merchant fiat wallet and then transffer to merchant wallet. 
+
+&nbsp;
+
+![Diagram: Deposit with RapidTransfer](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_rt_high_risk.png)
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
+### Withdrawal to bank account
+
+Customers can withdraw amount to their bank account. Withdrawals in EUR and GBP are supported.
+
+* Customer initiates withdrawal to bank account on Merchant's platform.
+
+* The Merchant requests the withdrawal from Paysafe and includes customer’s bank account or card details in the request.
+
+* Paysafe transfers withdrawal amount from merchant’s wallet to customer's wallet and withdraws the amount from customer's wallet.
+
+* Paysafe routes the withdrawal to our partner banks and payment providers.
+
+* Paysafe returns a payment details in the response to the Merchant.
+
+Paysafe will also make sure any returned withdrawals are processed by crediting the returned amount back to the merchant’s wallet. The Merchant will receive a notification for such returned withdrawals.
+
+&nbsp;
+
+![Diagram: Withdraw to a bank account](https://github.com/paysafegroup/EmbeddedFinanceAPI/blob/sequenceDiagrams/diagrams/deposit_rt_high_risk.png)
+
+&nbsp;
+
+&nbsp;
+
+&nbsp;
+
 
 ## API Overview
 Built on top of Paysafe's solid API infrastructure, it requires minimal enhancement in terms of integration, authentication and monitoring.  
@@ -1276,6 +1370,71 @@ The webhook is sent when there's an update on the customer account. The `operati
 + Request Account update callback request (application/json)
    + Attributes (AccountUpdateWebhook)
 + Response 202 (application/json)
+
+## Payment Handle update [POST /webhook/path/at/merchant/system/callbacks/paymenthandleupdate]
+The webhook is sent when there's an update on the payment handles. The `eventType` signifies the change that occurred.
+
++ Request Payment callback request (application/json)
+   + Body 
+   
+             {
+              "resourceId": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+              "eventDate": "2021-07-15T17:54:12Z",
+              "eventType": "PAYMENT_HANDLE_PAYABLE",
+              "payload": {
+                "id": "372b5ee7-6360-4403-b444-164f8f1d2709",
+                "amount": 3000,
+                "merchantRefNum": "merchantRefNum-124",
+                "action": "REDIRECT",
+                "currencyCode": "GBP",
+                "usage": "SINGLE_USE",
+                "status": "PAYABLE",
+                "paymentType": "RAPID_TRANSFER",
+                "executionMode": "SYNCHRONOUS",
+                "customerIp": "73.82.192.17",
+                "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                "billingDetails": {
+                    "street": "100 Queen",
+                    "street2": "Unit 201",
+                    "city": "Toronto",
+                    "country": "CA",
+                    "zip": "M5H 2N2"
+                },
+                "rapidTransfer" : {
+                   "sepa": {
+                       "accountHolderName": "John Doe",
+                       "rapidTransferBankId": "1000203",
+                       "bic": "ABNANL2APIP",
+                       "lastDigits": "00"
+                    }
+                },
+                "wallet":{
+                   "customerId" : "GGG",
+                   "slipId" : "100753"
+                },
+                "returnLinks": [{
+                        "rel": "on_completed",
+                        "href": "https://US_commerce_site/payment/return/success",
+                        "method": "GET"
+                    },
+                    {
+                        "rel": "on_failed",
+                        "href": "https://US_commerce_site/payment/return/failed",
+                        "method": "GET"
+                    }
+                ],
+                "links": [{
+                    "rel": "redirect_payment",
+                    "href": "http://api.paysafe.com/rapidtransfer/redirect/372b5ee7-6360-4403-b444-164f8f1d2709",
+                    "method": "GET"
+                }],
+                "timeToLiveSeconds": 899,
+                "transactionType": "PAYMENT"
+              }
+            }
+    
++ Response 202 (application/json)
+
 
 ## Payment update [POST /webhook/path/at/merchant/system/callbacks/paymentupdate]
 The webhook is sent when there's an update on the payments. The `eventType` signifies the change that occurred.
