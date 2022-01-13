@@ -85,41 +85,292 @@ Transaction limits for Rapid Transfer
 |-----------|-----------|------------|
 | 5,000 EUR | 7,500 EUR | 25,000 EUR |
 
-* Merchant will show the Rapid Transfer payment method to their customers alongside the other deposit options.
+#### Steps
 
-* Merchant calls Paysafe's available banks API for Rapid Transfer and show the banks list to customer for selection.
+1. Customer selects 'Rapid Transfer' as the payment type from the Merchant's website 
 
-* Customer selects the bank from the list. 
+2. Merchant calls Paysafe to retrieve a list of available banks and displays to Customer
 
-* Merchant will send a payment handle request to Paysafe with the required details like customer selected bank id and will redirect the customer to the Rapid Transfer redirect url returned by Paysafe.
+    &nbsp;
+    
+    ---
+    
+    **GET** `https://api2.paysafe.com/digitalwallet/v1rapidtransferbanks?country=GB&amount=50000`
+    
+                {
+                    "rapidTransferBanks": [
+                      {
+                        "id": "1000203",
+                        "bic": "NWBKGB2L",
+                        "name": "Natwest uk",
+                        "isAccountRequiredBeforeInitialization": true,
+                        "limit": "15000000",
+                        "country": "GB"
+                      }
+                    ]
+                }
 
-* Rapid Transfer payment flow will assist the customer to authenticate with their bank, validate payment account and confirm a bank transfer to Paysafe.
+   ---
+   
+3. Customer selects bank
 
-* Customer will be redicted back to Merchant page once the customer authenticates the payment in RT page. Paysafe will send the proper webhooks for Payment Handles and Transactions with proper statuses well.
+4. Merchant calls Paysafe to create a Payment Handle and Paysafe responds with a Redirect URL
 
-* Merchant has to do a Payment call using the Payment Handle.
+    &nbsp;
+    
+    ---
+    
+    **POST** `https://api2.paysafe.com/paymenthub/v1/paymenthandles`
 
-* Paysafe will credit the amount to customer’s wallet and then transfer the same amount from customer's wallet to merchant's wallet.
+                {
+                    "merchantRefNum": "merchantRefNum-124",
+                    "transactionType": "PAYMENT",
+                    "rapidTransfer" : {
+                       "sepa": {
+                           "accountHolderName": "John Doe",
+                           "rapidTransferBankId": "1000203"
+                        }
+                    },
+                    "paymentType": "RAPID_TRANSFER",
+                    "amount": 3000,
+                    "currencyCode": "GBP",
+                    "customerIp": "73.82.192.17",
+                    "billingDetails": {
+                        "street": "100 Queen",
+                        "street2": "Unit 201",
+                        "city": "Toronto",
+                        "zip": "M5H 2N2",
+                        "country": "CA"
+                    },
+                    "wallet":{
+                       "customerId" : "GGG",
+                    },
+                    "returnLinks": [{
+                            "rel": "on_completed",
+                            "href": "https://US_commerce_site/payment/return/success",
+                            "method": "GET"
+                        },
+                        {
+                            "rel": "on_failed",
+                            "href": "https://US_commerce_site/payment/return/failed",
+                            "method": "GET"
+                        }
+                    ]
+                }
 
-&nbsp;
 
-Deposit with Rapid Transfer for instant confirmation transactions
+    **Response**
 
-![Diagram: Deposit with RapidTransfer for low risk transactions](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_rt_low_risk.png)
+                {
+                    "id": "372b5ee7-6360-4403-b444-164f8f1d2709",
+                    "amount": 3000,
+                    "merchantRefNum": "merchantRefNum-124",
+                    "action": "REDIRECT",
+                    "currencyCode": "GBP",
+                    "usage": "SINGLE_USE",
+                    "status": "INITIATED",
+                    "paymentType": "RAPID_TRANSFER",
+                    "executionMode": "SYNCHRONOUS",
+                    "customerIp": "73.82.192.17",
+                    "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                    "billingDetails": {
+                        "street": "100 Queen",
+                        "street2": "Unit 201",
+                        "city": "Toronto",
+                        "country": "CA",
+                        "zip": "M5H 2N2"
+                    },
+                    "rapidTransfer" : {
+                       "sepa": {
+                           "accountHolderName": "John Doe",
+                           "rapidTransferBankId": "1000203",
+                           "bic": "ABNANL2APIP",
+                           "lastDigits": "00"
+                        }
+                    },
+                    "wallet":{
+                       "customerId" : "GGG",
+                       "slipId" : "100753"
+                    },
+                    "returnLinks": [{
+                            "rel": "on_completed",
+                            "href": "https://US_commerce_site/payment/return/success",
+                            "method": "GET"
+                        },
+                        {
+                            "rel": "on_failed",
+                            "href": "https://US_commerce_site/payment/return/failed",
+                            "method": "GET"
+                        }
+                    ],
+                    "links": [{
+                        "rel": "redirect_payment",
+                        "href": "http://api.paysafe.com/rapidtransfer/redirect/372b5ee7-6360-4403-b444-164f8f1d2709",
+                        "method": "GET"
+                    }],
+                    "timeToLiveSeconds": 899,
+                    "transactionType": "PAYMENT"
+                }
 
-&nbsp;
+    
+    ---
+    
+5. Merchant redirects the Customer
 
-&nbsp;
+6. Customer authenticates banking details and confirms
 
-Deposit with Rapid Transfer for delayed confirmation transactions
+7. Customer is redirected back to the Merchant or **Merchant recieves a PaymentHandle webhook that is PAYABLE**
 
-![Diagram: Deposit with RapidTransfer for high risk transactions](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_rt_high_risk.png)
+    &nbsp;
+    
+    ---
+    
+    **POST** `https://<merchant callback URL>`
+    
+                {
+                  "resourceId": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+                  "eventDate": "2021-07-15T17:54:12Z",
+                  "eventType": "PAYMENT_HANDLE_PAYABLE",
+                  "payload": {
+                    "id": "372b5ee7-6360-4403-b444-164f8f1d2709",
+                    "amount": 3000,
+                    "merchantRefNum": "merchantRefNum-124",
+                    "action": "REDIRECT",
+                    "currencyCode": "GBP",
+                    "usage": "SINGLE_USE",
+                    "status": "PAYABLE",
+                    "paymentType": "RAPID_TRANSFER",
+                    "executionMode": "SYNCHRONOUS",
+                    "customerIp": "73.82.192.17",
+                    "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                    "billingDetails": {
+                      "street": "100 Queen",
+                      "street2": "Unit 201",
+                      "city": "Toronto",
+                      "country": "CA",
+                      "zip": "M5H 2N2"
+                    },
+                    "rapidTransfer": {
+                      "sepa": {
+                        "accountHolderName": "John Doe",
+                        "rapidTransferBankId": "1000203",
+                        "bic": "ABNANL2APIP",
+                        "lastDigits": "00"
+                      }
+                    },
+                    "wallet": {
+                      "customerId": "GGG",
+                      "slipId": "100753"
+                    },
+                    "returnLinks": [
+                      {
+                        "rel": "on_completed",
+                        "href": "https://US_commerce_site/payment/return/success",
+                        "method": "GET"
+                      },
+                      {
+                        "rel": "on_failed",
+                        "href": "https://US_commerce_site/payment/return/failed",
+                        "method": "GET"
+                      }
+                    ],
+                    "links": [
+                      {
+                        "rel": "redirect_payment",
+                        "href": "http://api.paysafe.com/rapidtransfer/redirect/372b5ee7-6360-4403-b444-164f8f1d2709",
+                        "method": "GET"
+                      }
+                    ],
+                    "timeToLiveSeconds": 899,
+                    "transactionType": "PAYMENT"
+                  }
+                }
+                
+    ---
 
-&nbsp;
+    **NOTE**  A redirect may not always occur as it is depenant on the Customer, browser and connection. The webhook shold be used as a failsafe to complete the payment to avoid reconcilliation issues.
+    
+    &nbsp;
+    
+8. Merchant looks up the status of the payment handle 
 
-&nbsp;
+    &nbsp;
 
-&nbsp;
+    **NOTE**  Only required if webhook not recieved
+    
+    &nbsp;
+    
+    ---
+    
+    **NOTE**
+    
+    *Add an example*
+    
+    ---
+
+9. Merchant finalizes the payment
+   
+    &nbsp;
+    
+    ---
+    
+    **POST** `https://api2.paysafe.com/paymenthub/v1/payments`
+    
+                {
+                  "merchantRefNum": "merchantRefNum-123",
+                  "amount": 1000,
+                  "currencyCode": "GBP",
+                  "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                  "description": "Consumer Purchase",
+                  "customerIp": "73.82.192.17"
+                }
+
+    **Response**
+    
+                {
+                  "id": "3aeb9c63-6386-46a3-9f8e-f452e722228a",
+                  "merchantRefNum": "merchantRefNum-123",
+                  "amount": 1000,
+                  "currencyCode": "GBP",
+                  "paymentHandleToken": "SCyGZDlUuZ9zxjyd",
+                  "paymentType": "RAPID_TRANSFER",
+                  "rapidTranfer": {
+                    "sepa": {
+                      "nickName": "Sally's Barclays Account",
+                      "accountHolderName": "XYZ Company",
+                      "bic": "ABNANL2APIP",
+                      "lastDigits": "11"
+                    }
+                  },
+                  "description": "Consumer Purchase",
+                  "customerIp": "73.82.192.17",
+                  "availableToSettle": 0,
+                  "status": "PROCESSING",
+                  "wallet": {
+                    "customerId": "abc",
+                    "slipId": "100753",
+                    "customerAccount": {
+                      "id": "xyz",
+                      "transactions": [
+                        {
+                          "id": "12321",
+                          "type": "DEPOSIT",
+                          "amount": 1000,
+                          "currencyCode": "GBP",
+                          "creationTime": "2021-07-15T17:54:12Z",
+                          "direction": "CREDIT",
+                          "paymentType": "RAPID_TRANSFER",
+                          "status": "PROCESSING",
+                          "merchantRefNum": "merchantRefNum-123"
+                        }
+                      ]
+                    }
+                  },
+                  "txnTime": "2018-12-11T16:33:49Z"
+                }
+
+    ---
+
 
 ### Deposit with a bank transfer
 
@@ -133,7 +384,7 @@ Paysafe will support Merchant's customers with digital wallets to transfer money
 
 &nbsp;
 
-![Diagram: Deposit with RapidTransfer](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_rt_high_risk.png)
+![Diagram: Deposit with RapidTransfer](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/deposit_bank_account.png)
 
 &nbsp;
 
@@ -159,7 +410,7 @@ Paysafe will also make sure any returned withdrawals are processed by crediting 
 
 &nbsp;
 
-![Diagram: Withdraw to a bank account](https://github.com/paysafegroup/EmbeddedFinanceAPI/blob/sequenceDiagrams/diagrams/deposit_rt_high_risk.png)
+![Diagram: Withdraw to a bank account](https://github.com/paysafegroup/EmbeddedFinanceAPI/raw/sequenceDiagrams/diagrams/standalonecredit_bank_transfer.png)
 
 &nbsp;
 
